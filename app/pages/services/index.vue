@@ -241,6 +241,9 @@
                     <UFormField label="Start Date" name="startDate">
                       <UInput v-model="form.startDate" type="date" size="sm" />
                     </UFormField>
+                    <UFormField v-if="editingService" label="Next Due Date" name="nextDueDate">
+                      <UInput v-model="form.nextDueDate" type="date" size="sm" />
+                    </UFormField>
                   </div>
                 </div>
 
@@ -344,6 +347,7 @@ const form = ref({
   price: '',
   billingCycle: 'MONTHLY',
   startDate: '',
+  nextDueDate: '',
   domain: '',
   description: ''
 })
@@ -425,6 +429,7 @@ const openModal = (service?: any) => {
       price: service.price.toString(),
       billingCycle: service.billingCycle,
       startDate: service.startDate?.split('T')[0] || '',
+      nextDueDate: service.nextDueDate?.split('T')[0] || '',
       domain: service.domain || '',
       description: service.description || ''
     }
@@ -437,6 +442,7 @@ const openModal = (service?: any) => {
       price: '',
       billingCycle: 'MONTHLY',
       startDate: new Date().toISOString().split('T')[0],
+      nextDueDate: '',
       domain: '',
       description: ''
     }
