@@ -65,13 +65,6 @@
             Sign In
           </UButton>
         </form>
-
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <p class="text-xs text-blue-300 text-center">
-            <strong>Demo:</strong> admin@mypanel.com / admin123
-          </p>
-        </div>
       </div>
     </NuxtLayout>
   </div>
