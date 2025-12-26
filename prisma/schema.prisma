@@ -1,0 +1,412 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS & ROLES
+// ============================================
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  avatar    String?
+  role      UserRole @default(ADMIN)
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN       // Full access to everything
+  SALES       // Can manage clients, invoices, quotations, view services, record payments
+  SUPPORT     // Can view clients, services, create support tickets (future)
+  VIEWER      // Read-only access to reports and data
+}
+
+// ============================================
+// COMPANY SETTINGS
+// ============================================
+model Settings {
+  id              Int      @id @default(autoincrement())
+  companyName     String   @default("My Company")
+  companyEmail    String?
+  companyPhone    String?
+  companyAddress  String?  @db.Text
+  companyCity     String?
+  companyState    String?
+  companyZip      String?
+  companyCountry  String?
+  companyWebsite  String?
+  companyTaxId    String?
+  logoUrl         String?
+  invoicePrefix   String   @default("INV-")
+  quotePrefix     String   @default("QUO-")
+  currency        String   @default("USD")
+  currencySymbol  String   @default("$")
+  taxRate         Decimal  @default(0) @db.Decimal(5, 2)
+  paymentTerms    String?  @db.Text
+  invoiceNotes    String?  @db.Text
+  invoiceFooter   String?  @db.Text
+  bankDetails     String?  @db.Text
+  
+  // Email reminder settings
+  reminderDays    String   @default("14,7,3,1") // days before due date
+  overdueDays     String   @default("1,3,7,14") // days after due date
+  autoSuspendDays Int      @default(14)
+  
+  // SMTP Settings
+  smtpHost        String?
+  smtpPort        Int?
+  smtpUser        String?
+  smtpPass        String?
+  smtpFrom        String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ============================================
+// CLIENTS
+// ============================================
+model Client {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
+  phone          String?
+  company        String?
+  
+  // Billing Address
+  billingAddress  String?  @db.Text
+  billingCity     String?
+  billingState    String?
+  billingZip      String?
+  billingCountry  String?
+  
+  // Optional Service Address
+  serviceAddress  String?  @db.Text
+  serviceCity     String?
+  serviceState    String?
+  serviceZip      String?
+  serviceCountry  String?
+  
+  notes          String?   @db.Text
+  status         ClientStatus @default(ACTIVE)
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  services       Service[]
+  invoices       Invoice[]
+  quotations     Quotation[]
+  payments       Payment[]
+
+  @@map("clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// ============================================
+// SERVICE CATEGORIES
+// ============================================
+model ServiceCategory {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?   @db.Text
+  color       String    @default("#3b82f6")
+  icon        String    @default("server")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  services    Service[]
+
+  @@map("service_categories")
+}
+
+// ============================================
+// SERVICES (Assigned to Clients)
+// ============================================
+model Service {
+  id             Int           @id @default(autoincrement())
+  name           String
+  description    String?       @db.Text
+  
+  // Pricing
+  price          Decimal       @db.Decimal(10, 2)
+  billingCycle   BillingCycle  @default(MONTHLY)
+  
+  // Dates
+  startDate      DateTime
+  nextDueDate    DateTime
+  expiryDate     DateTime?
+  
+  // Status
+  status         ServiceStatus @default(PENDING)
+  
+  // Metadata
+  domain         String?       // For hosting/website services
+  server         String?       // Server details
+  username       String?       // Service username
+  notes          String?       @db.Text
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  clientId       Int
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  categoryId     Int
+  category       ServiceCategory @relation(fields: [categoryId], references: [id])
+  
+  invoiceItems   InvoiceItem[]
+
+  @@map("services")
+}
+
+enum BillingCycle {
+  ONETIME
+  MONTHLY
+  QUARTERLY
+  SEMIANNUALLY
+  ANNUALLY
+  BIENNIALLY
+}
+
+enum ServiceStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+  CANCELLED
+}
+
+// ============================================
+// INVOICES
+// ============================================
+model Invoice {
+  id             Int           @id @default(autoincrement())
+  invoiceNumber  String        @unique
+  
+  // Dates
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime
+  paidDate       DateTime?
+  
+  // Amounts
+  subtotal       Decimal       @db.Decimal(10, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(10, 2)
+  discount       Decimal       @default(0) @db.Decimal(10, 2)
+  total          Decimal       @db.Decimal(10, 2)
+  amountPaid     Decimal       @default(0) @db.Decimal(10, 2)
+  
+  // Status
+  status         InvoiceStatus @default(DRAFT)
+  
+  // Notes
+  notes          String?       @db.Text
+  terms          String?       @db.Text
+  
+  // Reminder tracking
+  lastReminderSent DateTime?
+  reminderCount    Int         @default(0)
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  clientId       Int
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  items          InvoiceItem[]
+  payments       Payment[]
+
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+// ============================================
+// INVOICE ITEMS
+// ============================================
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  amount      Decimal  @db.Decimal(10, 2)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  invoiceId   Int
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  serviceId   Int?
+  service     Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@map("invoice_items")
+}
+
+// ============================================
+// PAYMENTS
+// ============================================
+model Payment {
+  id            Int           @id @default(autoincrement())
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentDate   DateTime      @default(now())
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
+  reference     String?       // Transaction reference/ID
+  notes         String?       @db.Text
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  invoiceId     Int
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  
+  clientId      Int
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  PAYPAL
+  MOBILE_MONEY
+  CRYPTO
+  OTHER
+}
+
+// ============================================
+// QUOTATIONS
+// ============================================
+model Quotation {
+  id              Int             @id @default(autoincrement())
+  quoteNumber     String          @unique
+  
+  // Dates
+  issueDate       DateTime        @default(now())
+  validUntil      DateTime
+  
+  // Amounts
+  subtotal        Decimal         @db.Decimal(10, 2)
+  taxAmount       Decimal         @default(0) @db.Decimal(10, 2)
+  discount        Decimal         @default(0) @db.Decimal(10, 2)
+  total           Decimal         @db.Decimal(10, 2)
+  
+  // Status
+  status          QuotationStatus @default(DRAFT)
+  
+  // Notes
+  notes           String?         @db.Text
+  terms           String?         @db.Text
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  clientId        Int
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  
+  items           QuotationItem[]
+
+  @@map("quotations")
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CONVERTED
+}
+
+// ============================================
+// QUOTATION ITEMS
+// ============================================
+model QuotationItem {
+  id          Int       @id @default(autoincrement())
+  description String
+  quantity    Int       @default(1)
+  unitPrice   Decimal   @db.Decimal(10, 2)
+  amount      Decimal   @db.Decimal(10, 2)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  quotationId Int
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@map("quotation_items")
+}
+
+// ============================================
+// EMAIL LOGS (Track all sent emails)
+// ============================================
+model EmailLog {
+  id          Int       @id @default(autoincrement())
+  recipient   String
+  subject     String
+  body        String    @db.Text
+  type        EmailType
+  status      String    @default("sent")
+  error       String?   @db.Text
+  
+  // Reference to related entity
+  referenceType String?  // "invoice", "quotation", "service"
+  referenceId   Int?
+  
+  sentAt      DateTime  @default(now())
+
+  @@map("email_logs")
+}
+
+enum EmailType {
+  INVOICE_CREATED
+  INVOICE_REMINDER
+  INVOICE_OVERDUE
+  QUOTE_SENT
+  SERVICE_ACTIVATED
+  SERVICE_SUSPENDED
+  SERVICE_UNSUSPENDED
+  SERVICE_TERMINATED
+  SERVICE_EXPIRING
+  PAYMENT_RECEIVED
+  WELCOME
+  CUSTOM
+}
