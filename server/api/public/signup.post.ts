@@ -2,6 +2,7 @@
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { sendEmail, emailTemplates } from '../../utils/email'
+import { getAppUrl } from '../../utils/config'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -121,7 +122,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Send verification email
-    const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+    const baseUrl = getAppUrl()
     const verifyUrl = `${baseUrl}/verify-email?token=${verificationToken}`
 
     try {
@@ -134,7 +135,7 @@ export default defineEventHandler(async (event) => {
             to: body.email,
             subject: emailData.subject,
             html: emailData.html,
-            type: 'WELCOME'
+            type: 'VERIFICATION'
         })
     } catch (error) {
         console.error('Failed to send verification email:', error)

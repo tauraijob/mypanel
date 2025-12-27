@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     smtpFrom: process.env.SMTP_FROM,
     public: {
       appName: process.env.APP_NAME || 'MyPanel',
-      appUrl: process.env.APP_URL || 'http://localhost:3000'
+      appUrl: (process.env.APP_URL || 'http://localhost:3000').split('#')[0].trim()
     }
   },
 

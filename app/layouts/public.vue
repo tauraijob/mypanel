@@ -71,9 +71,9 @@
           <div>
             <h4 class="text-white font-semibold mb-6">Legal</h4>
             <ul class="space-y-4 text-sm text-slate-400">
-              <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
-              <li><a href="#" class="hover:text-white">Terms of Service</a></li>
-              <li><a href="#" class="hover:text-white">Contact Us</a></li>
+              <li><NuxtLink to="/privacy" class="hover:text-white">Privacy Policy</NuxtLink></li>
+              <li><NuxtLink to="/terms" class="hover:text-white">Terms of Service</NuxtLink></li>
+              <li><NuxtLink to="/contact" class="hover:text-white">Contact Us</NuxtLink></li>
             </ul>
           </div>
         </div>

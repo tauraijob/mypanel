@@ -1,5 +1,6 @@
 // Initiate Paynow payment for subscription plans
 import { Paynow } from 'paynow'
+import { getAppUrl } from '../../utils/config'
 
 export default defineEventHandler(async (event) => {
     const ctx = await requireOrgContext(event)
@@ -49,7 +50,7 @@ export default defineEventHandler(async (event) => {
     )
 
     // Set return and result URLs
-    const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+    const baseUrl = getAppUrl()
     paynow.resultUrl = `${baseUrl}/api/billing/paynow-callback`
     paynow.returnUrl = `${baseUrl}/billing?payment=pending`
 

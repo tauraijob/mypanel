@@ -156,6 +156,7 @@ body {
   padding: 1px;
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(6, 182, 212, 0.5));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -312,7 +313,8 @@ select {
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: #f1f5f9 !important;
   border-radius: 0.75rem !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.75rem 1rem;
+  /* Removed !important to allow Nuxt UI icon padding */
   font-size: 1rem !important;
   transition: all 0.2s ease !important;
 }
@@ -391,8 +393,17 @@ button[role="combobox"]:focus,
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: #f1f5f9 !important;
   border-radius: 0.75rem !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.75rem 1rem;
+  /* Removed !important */
   width: 100% !important;
+}
+
+/* Fix for inputs with leading icons - Ensuring compatibility with Nuxt UI v4 structure */
+.relative.inline-flex.items-center> :not(input):not(textarea):first-child~input,
+.relative.inline-flex.items-center> :not(input):not(textarea):first-child~textarea,
+[data-part="leading-element"]~input,
+[data-part="leading-element"]~textarea {
+  padding-left: 2.75rem !important;
 }
 
 /* Form Select Styling */

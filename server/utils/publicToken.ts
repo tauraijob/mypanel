@@ -1,4 +1,5 @@
 import { createHash } from 'crypto'
+import { getAppUrl } from './config'
 
 const SECRET = process.env.PUBLIC_TOKEN_SECRET || 'mypanel-secret-key-2024'
 
@@ -35,14 +36,14 @@ export function verifyPublicToken(token: string): { type: 'invoice' | 'quotation
 // Generate public URL for an invoice
 export function getPublicInvoiceUrl(invoiceId: number, baseUrl?: string): string {
   const token = generatePublicToken('invoice', invoiceId)
-  const base = baseUrl || process.env.APP_URL || 'http://localhost:3000'
+  const base = baseUrl || getAppUrl()
   return `${base}/view/invoice/${token}`
 }
 
 // Generate public URL for a quotation
 export function getPublicQuotationUrl(quotationId: number, baseUrl?: string): string {
   const token = generatePublicToken('quotation', quotationId)
-  const base = baseUrl || process.env.APP_URL || 'http://localhost:3000'
+  const base = baseUrl || getAppUrl()
   return `${base}/view/quotation/${token}`
 }
 

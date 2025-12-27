@@ -1,5 +1,6 @@
 // Email verification endpoint
 import { sendEmail, emailTemplates } from '../../utils/email'
+import { getAppUrl } from '../../utils/config'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
 
     // Send welcome email
     try {
-        const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+        const baseUrl = getAppUrl()
         const emailData = emailTemplates.welcomeEmail({
             name: user.name,
             organizationName: user.organization?.name || 'Your Organization',

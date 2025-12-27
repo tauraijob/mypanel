@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // 4. Super Admin routes
     // 5. The billing page itself (to avoid loop)
 
-    const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/setup', '/features', '/pricing', '/how-it-works']
+    const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/setup', '/features', '/pricing', '/how-it-works', '/privacy', '/terms', '/contact']
     if (publicRoutes.includes(to.path) || to.path.startsWith('/portal') || to.path.startsWith('/api/') || to.path.startsWith('/public/')) {
         return
     }

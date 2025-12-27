@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import { getPublicInvoiceUrl } from '../utils/publicToken'
 import { sendEmail, emailTemplates } from '../utils/email'
+import { getAppUrl } from '../utils/config'
 
 interface InvoiceItemInput {
     description: string
@@ -121,7 +122,7 @@ export const createInvoice = async (params: CreateInvoiceParams) => {
 
         // For URL generation, we need base URL. In Cron context, event might not exist.
         // We should use process.env.APP_URL
-        const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+        const baseUrl = getAppUrl()
         const viewUrl = getPublicInvoiceUrl(invoice.id, baseUrl)
 
         const template = emailTemplates.invoiceCreated({
