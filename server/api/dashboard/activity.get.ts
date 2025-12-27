@@ -1,36 +1,54 @@
-import { format, formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 
-export default defineEventHandler(async () => {
-  const now = new Date()
+export default defineEventHandler(async (event) => {
+  // Require authentication and get user's organization
+  const user = await requireAuth(event)
 
-  // Get recent payments
+  if (!user.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'Organization access required'
+    })
+  }
+
+  const organizationId = user.organizationId
+
+  // Get recent payments for this organization
   const recentPayments = await prisma.payment.findMany({
     take: 5,
     orderBy: { paymentDate: 'desc' },
+    where: {
+      invoice: { organizationId }
+    },
     include: {
       client: { select: { name: true } },
       invoice: { select: { invoiceNumber: true } }
     }
   })
 
-  // Get recent invoices
+  // Get recent invoices for this organization
   const recentInvoices = await prisma.invoice.findMany({
     take: 5,
     orderBy: { createdAt: 'desc' },
+    where: { organizationId },
     include: {
       client: { select: { name: true } }
     }
   })
 
-  // Get recent clients
+  // Get recent clients for this organization
   const recentClients = await prisma.client.findMany({
     take: 3,
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    where: { organizationId }
   })
 
-  // Get recent service status changes (suspended services)
+  // Get recent service status changes (suspended services) for this organization
   const suspendedServices = await prisma.service.findMany({
-    where: { status: 'SUSPENDED' },
+    where: {
+      status: 'SUSPENDED',
+      client: { organizationId }
+    },
     take: 3,
     orderBy: { updatedAt: 'desc' },
     include: {
@@ -99,7 +117,6 @@ export default defineEventHandler(async () => {
 
   // Sort by time descending and take top 10
   activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-  
+
   return activities.slice(0, 10)
 })
-

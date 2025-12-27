@@ -1,6 +1,17 @@
-import { startOfDay, subDays, subMonths, subYears, format, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth } from 'date-fns'
+import { startOfDay, subDays, subMonths, subYears, format, eachDayOfInterval, eachMonthOfInterval } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
+  // Require authentication and get user's organization
+  const user = await requireAuth(event)
+
+  if (!user.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'Organization access required'
+    })
+  }
+
+  const organizationId = user.organizationId
   const query = getQuery(event)
   const period = (query.period as string) || 'month' // week, month, year
 
@@ -29,10 +40,11 @@ export default defineEventHandler(async (event) => {
       break
   }
 
-  // Get all payments in the period
+  // Get all payments in the period for this organization
   const payments = await prisma.payment.findMany({
     where: {
-      paymentDate: { gte: startDate, lte: now }
+      paymentDate: { gte: startDate, lte: now },
+      invoice: { organizationId }
     },
     select: {
       amount: true,
@@ -42,10 +54,11 @@ export default defineEventHandler(async (event) => {
     orderBy: { paymentDate: 'asc' }
   })
 
-  // Get all invoices created in the period
+  // Get all invoices created in the period for this organization
   const invoices = await prisma.invoice.findMany({
     where: {
-      issueDate: { gte: startDate, lte: now }
+      issueDate: { gte: startDate, lte: now },
+      organizationId
     },
     select: {
       total: true,
@@ -62,7 +75,7 @@ export default defineEventHandler(async (event) => {
   for (const payment of payments) {
     let index: number
     const date = new Date(payment.paymentDate)
-    
+
     switch (groupBy) {
       case 'day':
         index = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -74,7 +87,7 @@ export default defineEventHandler(async (event) => {
         index = (date.getFullYear() - startDate.getFullYear()) * 12 + date.getMonth() - startDate.getMonth()
         break
     }
-    
+
     if (index >= 0 && index < revenueData.length) {
       revenueData[index] += Number(payment.amount)
     }
@@ -83,7 +96,7 @@ export default defineEventHandler(async (event) => {
   for (const invoice of invoices) {
     let index: number
     const date = new Date(invoice.issueDate)
-    
+
     switch (groupBy) {
       case 'day':
         index = Math.floor((date.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -95,7 +108,7 @@ export default defineEventHandler(async (event) => {
         index = (date.getFullYear() - startDate.getFullYear()) * 12 + date.getMonth() - startDate.getMonth()
         break
     }
-    
+
     if (index >= 0 && index < invoiceData.length) {
       invoiceData[index] += Number(invoice.total)
     }
@@ -137,4 +150,3 @@ export default defineEventHandler(async (event) => {
     invoiceStatus: invoiceStatusCounts
   }
 })
-

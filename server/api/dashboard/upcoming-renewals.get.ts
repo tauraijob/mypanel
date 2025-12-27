@@ -2,6 +2,17 @@
 import { addDays, differenceInDays } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
+  // Require authentication and get user's organization
+  const user = await requireAuth(event)
+
+  if (!user.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'Organization access required'
+    })
+  }
+
+  const organizationId = user.organizationId
   const query = getQuery(event)
   const days = parseInt(query.days as string) || 7
 
@@ -14,7 +25,8 @@ export default defineEventHandler(async (event) => {
       nextDueDate: {
         gte: now,
         lte: futureDate
-      }
+      },
+      client: { organizationId }
     },
     include: {
       client: {
@@ -43,5 +55,3 @@ export default defineEventHandler(async (event) => {
 
   return renewals
 })
-
-

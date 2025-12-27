@@ -1,22 +1,35 @@
 
 import { differenceInDays } from 'date-fns'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // Require authentication and get user's organization
+  const user = await requireAuth(event)
+
+  if (!user.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'Organization access required'
+    })
+  }
+
+  const organizationId = user.organizationId
   const now = new Date()
 
-  // First, update overdue invoices
+  // First, update overdue invoices for this organization only
   await prisma.invoice.updateMany({
     where: {
       status: { in: ['SENT', 'PARTIALLY_PAID'] },
-      dueDate: { lt: now }
+      dueDate: { lt: now },
+      organizationId
     },
     data: { status: 'OVERDUE' }
   })
 
-  // Get overdue invoices
+  // Get overdue invoices for this organization
   const invoices = await prisma.invoice.findMany({
     where: {
-      status: 'OVERDUE'
+      status: 'OVERDUE',
+      organizationId
     },
     include: {
       client: {
@@ -39,5 +52,3 @@ export default defineEventHandler(async () => {
 
   return overdueInvoices
 })
-
-

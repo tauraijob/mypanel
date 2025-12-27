@@ -1,14 +1,25 @@
 
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // Require authentication and get user's organization
+  const user = await requireAuth(event)
+
+  if (!user.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'Organization access required'
+    })
+  }
+
+  const organizationId = user.organizationId
   const now = new Date()
   const thisMonthStart = startOfMonth(now)
   const thisMonthEnd = endOfMonth(now)
   const lastMonthStart = startOfMonth(subMonths(now, 1))
   const lastMonthEnd = endOfMonth(subMonths(now, 1))
 
-  // Get counts
+  // Get counts - filtered by organization
   const [
     totalClients,
     activeServices,
@@ -18,31 +29,50 @@ export default defineEventHandler(async () => {
     thisMonthClients,
     lastMonthClients
   ] = await Promise.all([
-    prisma.client.count({ where: { status: 'ACTIVE' } }),
-    prisma.service.count({ where: { status: 'ACTIVE' } }),
+    prisma.client.count({
+      where: {
+        status: 'ACTIVE',
+        organizationId
+      }
+    }),
+    prisma.service.count({
+      where: {
+        status: 'ACTIVE',
+        client: { organizationId }
+      }
+    }),
     prisma.invoice.findMany({
       where: {
-        status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] }
+        status: { in: ['SENT', 'PARTIALLY_PAID', 'OVERDUE'] },
+        organizationId
       },
       select: { total: true, amountPaid: true }
     }),
     prisma.payment.aggregate({
       where: {
-        paymentDate: { gte: thisMonthStart, lte: thisMonthEnd }
+        paymentDate: { gte: thisMonthStart, lte: thisMonthEnd },
+        invoice: { organizationId }
       },
       _sum: { amount: true }
     }),
     prisma.payment.aggregate({
       where: {
-        paymentDate: { gte: lastMonthStart, lte: lastMonthEnd }
+        paymentDate: { gte: lastMonthStart, lte: lastMonthEnd },
+        invoice: { organizationId }
       },
       _sum: { amount: true }
     }),
     prisma.client.count({
-      where: { createdAt: { gte: thisMonthStart, lte: thisMonthEnd } }
+      where: {
+        createdAt: { gte: thisMonthStart, lte: thisMonthEnd },
+        organizationId
+      }
     }),
     prisma.client.count({
-      where: { createdAt: { gte: lastMonthStart, lte: lastMonthEnd } }
+      where: {
+        createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+        organizationId
+      }
     })
   ])
 
@@ -54,8 +84,8 @@ export default defineEventHandler(async () => {
   // Calculate percentage changes
   const thisMonth = Number(thisMonthRevenue._sum.amount) || 0
   const lastMonth = Number(lastMonthRevenue._sum.amount) || 0
-  const revenueChange = lastMonth > 0 
-    ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100) 
+  const revenueChange = lastMonth > 0
+    ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100)
     : 0
 
   const clientChange = lastMonthClients > 0
@@ -71,5 +101,3 @@ export default defineEventHandler(async () => {
     clientChange
   }
 })
-
-
