@@ -6,11 +6,50 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding production database...')
 
-  // Create users
-  const password = 'DevTeam24.api.api.'
-  const hashedPassword = await bcrypt.hash('DevTeam24.$.$.', 12)
+  const password = 'DevTeam24.$.$.'
+  const hashedPassword = await bcrypt.hash(password, 12)
 
-  // Super Admin
+  // 1. Create Default Subscription Plan
+  const plan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'Professional' },
+    update: {
+      monthlyPrice: 10,
+      yearlyPrice: 100,
+      maxClients: -1,
+      maxUsers: -1,
+      maxServices: -1,
+      features: 'Full Access, Analytics, Unlimited Clients'
+    },
+    create: {
+      name: 'Professional',
+      monthlyPrice: 10,
+      yearlyPrice: 100,
+      maxClients: -1,
+      maxUsers: -1,
+      maxServices: -1,
+      features: 'Full Access, Analytics, Unlimited Clients'
+    }
+  })
+  console.log('✅ Default plan created:', plan.name)
+
+  // 2. Create Initial Organization
+  const org = await prisma.organization.upsert({
+    where: { slug: 'default' },
+    update: {
+      planId: plan.id,
+      subscriptionStatus: 'ACTIVE'
+    },
+    create: {
+      name: 'My Company',
+      slug: 'default',
+      email: 'taujob1111@gmail.com',
+      planId: plan.id,
+      subscriptionStatus: 'ACTIVE'
+    }
+  })
+  console.log('✅ Initial organization created:', org.name)
+
+  // 3. Create Super Admin (Platform Owner)
   const superAdmin = await prisma.user.upsert({
     where: { email: 'taujob1111@gmail.com' },
     update: {
@@ -28,31 +67,34 @@ async function main() {
   })
   console.log('✅ Super Admin created:', superAdmin.email)
 
-  // Admin
+  // 4. Create Organization Admin
   const admin = await prisma.user.upsert({
     where: { email: 'mtauraij@gmail.com' },
     update: {
       role: 'ADMIN',
       password: hashedPassword,
-      isActive: true
+      isActive: true,
+      organizationId: org.id
     },
     create: {
       email: 'mtauraij@gmail.com',
       password: hashedPassword,
       name: 'Admin',
       role: 'ADMIN',
-      isActive: true
+      isActive: true,
+      organizationId: org.id
     }
   })
   console.log('✅ Admin user created:', admin.email)
 
-  // Create default settings
+  // 5. Create Organization Settings
   await prisma.settings.upsert({
-    where: { id: 1 },
+    where: { organizationId: org.id },
     update: {},
     create: {
-      companyName: 'My Company',
-      companyEmail: 'taujob1111@gmail.com',
+      organizationId: org.id,
+      companyName: org.name,
+      companyEmail: org.email,
       currency: 'USD',
       currencySymbol: '$',
       invoicePrefix: 'INV-',
@@ -65,36 +107,43 @@ async function main() {
       invoiceFooter: 'Thank you for your business!'
     }
   })
-  console.log('✅ Default settings created')
+  console.log('✅ Organization settings created')
 
-  // Create default service categories
+  // 6. Create Global Super Admin Settings
+  await prisma.superAdminSettings.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      platformName: 'MyPanel',
+      supportEmail: 'taujob1111@gmail.com'
+    }
+  })
+  console.log('✅ Super Admin settings created')
+
+  // 7. Create default service categories for the org
   const categoriesData = [
     { name: 'Web Hosting', description: 'Web hosting services', color: '#3b82f6', icon: 'server' },
     { name: 'Website Development', description: 'Website design and development', color: '#8b5cf6', icon: 'globe' },
-    { name: 'Software Development', description: 'Custom software solutions', color: '#10b981', icon: 'code' },
-    { name: 'Domain Registration', description: 'Domain name registration', color: '#f59e0b', icon: 'at-sign' },
-    { name: 'Maintenance', description: 'Website and software maintenance', color: '#06b6d4', icon: 'wrench' },
-    { name: 'Consulting', description: 'IT consulting services', color: '#ec4899', icon: 'message-circle' }
+    { name: 'Software Development', description: 'Custom software solutions', color: '#10b981', icon: 'code' }
   ]
 
   for (const cat of categoriesData) {
     await prisma.serviceCategory.upsert({
-      where: { name: cat.name },
+      where: { name_organizationId: { name: cat.name, organizationId: org.id } },
       update: {},
-      create: cat
+      create: { ...cat, organizationId: org.id }
     })
   }
-  console.log('✅ Service categories created')
+  console.log('✅ Default categories created')
 
   console.log('')
-  console.log('🎉 Production database seeded successfully!')
+  console.log('🎉 Database seeded successfully!')
   console.log('')
   console.log('📋 Login credentials:')
   console.log('   Super Admin: taujob1111@gmail.com')
-  console.log('   Admin: mtauraij@gmail.com')
-  console.log('   Password: DevTeam24.$.$.')
+  console.log('   Admin:       mtauraij@gmail.com')
+  console.log('   Password:    ' + password)
   console.log('')
-  console.log('⚠️  IMPORTANT: Change the passwords after first login!')
 }
 
 main()
