@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token') || ''
 
   const verified = verifyPublicToken(token)
-  
+
   if (!verified || verified.type !== 'invoice') {
     throw createError({
       statusCode: 404,
@@ -39,8 +39,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const settings = await prisma.settings.findFirst()
-  
+  // Get organization-specific settings
+  const settings = await prisma.settings.findFirst({
+    where: { organizationId: invoice.organizationId }
+  })
+
   // Import and reuse the PDF generation logic
   const doc = new PDFDocument({
     size: 'A4',
@@ -98,12 +101,12 @@ export default defineEventHandler(async (event) => {
       console.error('Failed to load logo:', error)
     }
   }
-  
+
   if (!hasLogo) {
     doc.roundedRect(margin, 35, 90, 90, 14).fill(primaryBlue)
     const companyInitial = (settings?.companyName || 'M')[0].toUpperCase()
     doc.fontSize(44).fillColor('#ffffff').font('Helvetica-Bold')
-       .text(companyInitial, margin, 60, { width: 90, align: 'center' })
+      .text(companyInitial, margin, 60, { width: 90, align: 'center' })
   }
 
   // Status badge
@@ -120,13 +123,13 @@ export default defineEventHandler(async (event) => {
   doc.roundedRect(420, 40, 80, 24, 12).fill(statusColor.bg)
   doc.circle(432, 52, 4).fill(statusColor.text)
   doc.fontSize(10).fillColor(statusColor.text).font('Helvetica-Bold')
-     .text(invoice.status, 440, 47, { width: 55 })
+    .text(invoice.status, 440, 47, { width: 55 })
 
   // Title
   doc.fontSize(32).fillColor(slate900).font('Helvetica-Bold')
-     .text('INVOICE', 380, 70, { width: 175, align: 'right' })
+    .text('INVOICE', 380, 70, { width: 175, align: 'right' })
   doc.fontSize(12).fillColor(slate400).font('Helvetica')
-     .text(`#${invoice.invoiceNumber}`, 380, 105, { width: 175, align: 'right' })
+    .text(`#${invoice.invoiceNumber}`, 380, 105, { width: 175, align: 'right' })
 
   // Company address
   let companyY = 125
@@ -168,29 +171,29 @@ export default defineEventHandler(async (event) => {
   doc.roundedRect(cardX, 255, 190, 55, 8).fill(slate900)
   doc.fontSize(7).fillColor(slate400).font('Helvetica-Bold').text('AMOUNT DUE', cardX + 12, 267)
   doc.fontSize(20).fillColor('#ffffff').font('Helvetica-Bold')
-     .text(formatCurrency(Number(invoice.total) - Number(invoice.amountPaid)), cardX + 12, 282)
+    .text(formatCurrency(Number(invoice.total) - Number(invoice.amountPaid)), cardX + 12, 282)
 
   // Items table
   const tableY = 330
   const tableWidth = pageWidth - (margin * 2)
-  
+
   doc.fontSize(8).fillColor(primaryBlue).font('Helvetica-Bold').text('INVOICE ITEMS', margin, tableY - 15)
   doc.roundedRect(margin, tableY, tableWidth, 35, 8).fill(slate900)
   doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold')
-     .text('Description', margin + 15, tableY + 13)
-     .text('Qty', margin + 300, tableY + 13, { width: 40, align: 'center' })
-     .text('Price', margin + 350, tableY + 13, { width: 60, align: 'right' })
-     .text('Amount', margin + 420, tableY + 13, { width: 75, align: 'right' })
+    .text('Description', margin + 15, tableY + 13)
+    .text('Qty', margin + 300, tableY + 13, { width: 40, align: 'center' })
+    .text('Price', margin + 350, tableY + 13, { width: 60, align: 'right' })
+    .text('Amount', margin + 420, tableY + 13, { width: 75, align: 'right' })
 
   let rowY = tableY + 35
   invoice.items.forEach((item, index) => {
     if (index % 2 === 1) doc.rect(margin, rowY, tableWidth, 30).fill('#fafafa')
     doc.fontSize(10).fillColor('#334155').font('Helvetica')
-       .text(item.description, margin + 15, rowY + 10, { width: 280 })
-       .text(item.quantity.toString(), margin + 300, rowY + 10, { width: 40, align: 'center' })
-       .text(formatCurrency(item.unitPrice), margin + 350, rowY + 10, { width: 60, align: 'right' })
-       .fillColor(slate900).font('Helvetica-Bold')
-       .text(formatCurrency(item.amount), margin + 420, rowY + 10, { width: 75, align: 'right' })
+      .text(item.description, margin + 15, rowY + 10, { width: 280 })
+      .text(item.quantity.toString(), margin + 300, rowY + 10, { width: 40, align: 'center' })
+      .text(formatCurrency(item.unitPrice), margin + 350, rowY + 10, { width: 60, align: 'right' })
+      .fillColor(slate900).font('Helvetica-Bold')
+      .text(formatCurrency(item.amount), margin + 420, rowY + 10, { width: 75, align: 'right' })
     rowY += 30
   })
   doc.roundedRect(margin, tableY, tableWidth, rowY - tableY, 8).strokeColor(slate200).lineWidth(1).stroke()
@@ -222,7 +225,7 @@ export default defineEventHandler(async (event) => {
   // Footer
   doc.rect(0, pageHeight - 50, pageWidth, 50).fill(slate50)
   doc.fontSize(10).fillColor(slate500).font('Helvetica')
-     .text(settings?.invoiceFooter || 'Thank you for your business!', margin, pageHeight - 35, { width: pageWidth - (margin * 2), align: 'center' })
+    .text(settings?.invoiceFooter || 'Thank you for your business!', margin, pageHeight - 35, { width: pageWidth - (margin * 2), align: 'center' })
 
   doc.end()
 

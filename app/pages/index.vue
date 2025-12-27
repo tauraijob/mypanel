@@ -132,6 +132,75 @@
       </div>
     </section>
 
+    <!-- Data Security Section -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 border-y border-white/5">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+            <UIcon name="i-lucide-shield-check" class="w-4 h-4 text-emerald-400" />
+            <span class="text-sm font-medium text-emerald-300">Enterprise-Grade Security</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Your Data is Safe With Us</h2>
+          <p class="text-slate-400 max-w-2xl mx-auto">
+            We take security seriously. Your business data is protected with industry-leading security measures and complete data isolation.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-card p-8 text-center hover:bg-white/5 transition-colors group">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-lock" class="w-8 h-8 text-emerald-400" />
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">256-bit Encryption</h3>
+            <p class="text-slate-400 text-sm">All data is encrypted in transit and at rest using bank-grade AES-256 encryption.</p>
+          </div>
+
+          <div class="glass-card p-8 text-center hover:bg-white/5 transition-colors group">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-database" class="w-8 h-8 text-blue-400" />
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">Complete Data Isolation</h3>
+            <p class="text-slate-400 text-sm">Your data is completely isolated. No other organization can ever access your information.</p>
+          </div>
+
+          <div class="glass-card p-8 text-center hover:bg-white/5 transition-colors group">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-server" class="w-8 h-8 text-purple-400" />
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">99.9% Uptime</h3>
+            <p class="text-slate-400 text-sm">Hosted on enterprise infrastructure with automated backups and redundancy.</p>
+          </div>
+
+          <div class="glass-card p-8 text-center hover:bg-white/5 transition-colors group">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-shield" class="w-8 h-8 text-amber-400" />
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">Secure Authentication</h3>
+            <p class="text-slate-400 text-sm">JWT-based authentication with secure password hashing and session management.</p>
+          </div>
+        </div>
+
+        <div class="mt-12 p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-white/5">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <UIcon name="i-lucide-check-circle" class="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <h4 class="text-lg font-semibold text-white">Your Privacy, Our Priority</h4>
+                <p class="text-slate-400 text-sm">We never sell or share your data. Your business information stays yours.</p>
+              </div>
+            </div>
+            <NuxtLink to="/privacy">
+              <UButton variant="outline" color="neutral" size="sm" icon="i-lucide-external-link" trailing>
+                Read Privacy Policy
+              </UButton>
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="py-24 px-4 sm:px-6 lg:px-8">
       <div class="max-w-4xl mx-auto glass-card p-12 text-center relative overflow-hidden">

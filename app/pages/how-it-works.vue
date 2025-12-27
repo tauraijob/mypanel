@@ -14,68 +14,88 @@
         </p>
       </div>
 
-      <!-- Steps -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div class="relative group">
-          <div class="mb-6 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-blue-500/20">
-              01
+      <!-- Steps Timeline -->
+      <div class="relative">
+        <!-- Connecting Line -->
+        <div class="hidden lg:block absolute top-12 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-emerald-500 via-amber-500 to-purple-500 opacity-30"></div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+          <!-- Step 1 -->
+          <div class="relative group">
+            <div class="glass-card p-8 h-full hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10">
+              <!-- Number Badge -->
+              <div class="absolute -top-5 left-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-blue-500/40 group-hover:scale-110 transition-transform">
+                  01
+                </div>
+              </div>
+              
+              <h3 class="text-xl font-bold text-white mb-3 mt-6">Sign Up & Choose a Plan</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Create your account and pick a subscription plan. You get a full 14-day free trial to explore all features — no credit card required.
+              </p>
+              
+              <!-- Arrow indicator -->
+              <div class="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 border-2 border-blue-500 items-center justify-center z-10">
+                <UIcon name="i-lucide-chevron-right" class="w-3 h-3 text-blue-400" />
+              </div>
             </div>
-            <div class="h-px flex-1 bg-white/10 hidden lg:block"></div>
           </div>
-          <h3 class="text-xl font-bold text-white mb-3">Sign Up & Choose a Plan</h3>
-          <p class="text-slate-400">
-            Create your account and pick a subscription plan. You get a full 14-day free trial to explore all features — no credit card required.
-          </p>
-          <div class="mt-8 p-4 rounded-xl bg-white/5 border border-white/10 group-hover:border-blue-500/30 transition-colors">
-            <UIcon name="i-lucide-user-plus" class="w-8 h-8 text-blue-400 opacity-50" />
-          </div>
-        </div>
 
-        <div class="relative group">
-          <div class="mb-6 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-emerald-500/20">
-              02
+          <!-- Step 2 -->
+          <div class="relative group">
+            <div class="glass-card p-8 h-full hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/10">
+              <div class="absolute -top-5 left-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-emerald-500/40 group-hover:scale-110 transition-transform">
+                  02
+                </div>
+              </div>
+              
+              <h3 class="text-xl font-bold text-white mb-3 mt-6">Configure Your Business</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Set up your company details, add your logo, and configure your invoice settings. Make it look professional.
+              </p>
+              
+              <div class="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 border-2 border-emerald-500 items-center justify-center z-10">
+                <UIcon name="i-lucide-chevron-right" class="w-3 h-3 text-emerald-400" />
+              </div>
             </div>
-            <div class="h-px flex-1 bg-white/10 hidden lg:block"></div>
           </div>
-          <h3 class="text-xl font-bold text-white mb-3">Configure Your Business</h3>
-          <p class="text-slate-400">
-            Set up your company details, add your logo, and configure your invoice settings. Make it look professional.
-          </p>
-          <div class="mt-8 p-4 rounded-xl bg-white/5 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
-            <UIcon name="i-lucide-settings-2" class="w-8 h-8 text-emerald-400 opacity-50" />
-          </div>
-        </div>
 
-        <div class="relative group">
-          <div class="mb-6 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-amber-500/20">
-              03
+          <!-- Step 3 -->
+          <div class="relative group">
+            <div class="glass-card p-8 h-full hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10">
+              <div class="absolute -top-5 left-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-amber-500/40 group-hover:scale-110 transition-transform">
+                  03
+                </div>
+              </div>
+              
+              <h3 class="text-xl font-bold text-white mb-3 mt-6">Add Clients & Services</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Add your clients and assign their services. Set billing cycles and due dates so you never forget a renewal.
+              </p>
+              
+              <div class="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 border-2 border-amber-500 items-center justify-center z-10">
+                <UIcon name="i-lucide-chevron-right" class="w-3 h-3 text-amber-400" />
+              </div>
             </div>
-            <div class="h-px flex-1 bg-white/10 hidden lg:block"></div>
           </div>
-          <h3 class="text-xl font-bold text-white mb-3">Add Clients & Services</h3>
-          <p class="text-slate-400">
-            Add your clients and assign their services. Set billing cycles and next due dates so you never forget a renewal.
-          </p>
-          <div class="mt-8 p-4 rounded-xl bg-white/5 border border-white/10 group-hover:border-amber-500/30 transition-colors">
-            <UIcon name="i-lucide-users-2" class="w-8 h-8 text-amber-400 opacity-50" />
-          </div>
-        </div>
 
-        <div class="relative group">
-          <div class="mb-6 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-purple-500/20">
-              04
+          <!-- Step 4 -->
+          <div class="relative group">
+            <div class="glass-card p-8 h-full hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10">
+              <div class="absolute -top-5 left-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-purple-500/40 group-hover:scale-110 transition-transform">
+                  04
+                </div>
+              </div>
+              
+              <h3 class="text-xl font-bold text-white mb-3 mt-6">Invoice & Get Paid</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Generate invoices, send them to clients, and record payments as they come in. Track who's paid and who hasn't.
+              </p>
             </div>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Invoice & Record Payments</h3>
-          <p class="text-slate-400">
-            Generate invoices, send them to clients, and record payments as they come in. Track who's paid and who hasn't.
-          </p>
-          <div class="mt-8 p-4 rounded-xl bg-white/5 border border-white/10 group-hover:border-purple-500/30 transition-colors">
-            <UIcon name="i-lucide-receipt" class="w-8 h-8 text-purple-400 opacity-50" />
           </div>
         </div>
       </div>

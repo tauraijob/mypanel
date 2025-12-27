@@ -26,7 +26,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const settings = await prisma.settings.findFirst()
+  // Get organization-specific settings
+  const settings = await prisma.settings.findFirst({
+    where: { organizationId: payment.invoice.organizationId }
+  })
   const companyName = settings?.companyName || 'MyPanel'
   const currencySymbol = settings?.currencySymbol || '$'
 
@@ -162,9 +165,9 @@ export default defineEventHandler(async (event) => {
     referenceId: payment.id
   })
 
-  return { 
-    success: true, 
-    message: `Receipt sent to ${payment.invoice.client.email}` 
+  return {
+    success: true,
+    message: `Receipt sent to ${payment.invoice.client.email}`
   }
 })
 

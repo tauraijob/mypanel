@@ -35,7 +35,10 @@ export default defineEventHandler(async (event) => {
       })
    }
 
-   const settings = await prisma.settings.findFirst()
+   // Get organization-specific settings for this invoice
+   const settings = await prisma.settings.findFirst({
+      where: { organizationId: invoice.organizationId }
+   })
 
    const doc = new PDFDocument({
       size: 'A4',

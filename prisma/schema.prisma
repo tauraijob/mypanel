@@ -143,6 +143,10 @@ model User {
   verificationToken   String?
   verificationExpires DateTime?
   
+  // Password reset
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+  
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -590,6 +594,10 @@ enum EmailType {
   WELCOME
   VERIFICATION
   CONTACT_FORM
+  PASSWORD_RESET
+  SUBSCRIPTION_REMINDER
+  ADMIN_NOTIFICATION
+  BACKUP
   CUSTOM
 }
 

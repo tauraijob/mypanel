@@ -1,6 +1,20 @@
-
-
 export default defineEventHandler(async (event) => {
+  const authUser = requireAuth(event)
+
+  // Get user's organization
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { organizationId: true, role: true }
+  })
+
+  // Must have an organization
+  if (!user?.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'No organization associated with your account'
+    })
+  }
+
   const query = getQuery(event)
   const page = parseInt(query.page as string) || 1
   const limit = parseInt(query.limit as string) || 10
@@ -8,7 +22,10 @@ export default defineEventHandler(async (event) => {
   const method = query.method as string || ''
   const search = query.search as string || ''
 
-  const where: any = {}
+  // Filter by organization
+  const where: any = {
+    organizationId: user.organizationId
+  }
 
   if (clientId) {
     where.clientId = clientId

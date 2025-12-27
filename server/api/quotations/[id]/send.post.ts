@@ -23,8 +23,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Get settings
-  const settings = await prisma.settings.findFirst()
+  // Get organization-specific settings
+  const settings = await prisma.settings.findFirst({
+    where: { organizationId: quotation.organizationId }
+  })
   const companyName = settings?.companyName || 'MyPanel'
   const currencySymbol = settings?.currencySymbol || '$'
 

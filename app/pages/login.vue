@@ -93,6 +93,9 @@
               <input type="checkbox" v-model="form.remember" class="form-checkbox" />
               Remember me
             </label>
+            <NuxtLink to="/forgot-password" class="text-sm text-blue-400 hover:text-blue-300">
+              Forgot password?
+            </NuxtLink>
           </div>
 
           <UButton

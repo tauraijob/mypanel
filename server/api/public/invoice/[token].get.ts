@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const token = getRouterParam(event, 'token') || ''
 
   const verified = verifyPublicToken(token)
-  
+
   if (!verified || verified.type !== 'invoice') {
     throw createError({
       statusCode: 404,
@@ -34,7 +34,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const settings = await prisma.settings.findFirst()
+  // Get organization-specific settings
+  const settings = await prisma.settings.findFirst({
+    where: { organizationId: invoice.organizationId }
+  })
 
   // Return limited data for public view (hide sensitive info)
   return {

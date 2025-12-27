@@ -1,15 +1,28 @@
 export default defineEventHandler(async (event) => {
-  // Only admins can list users
-  const auth = await requireAuth(event)
-  
-  if (auth.role !== 'ADMIN') {
+  const auth = requireAuth(event)
+
+  // Get user's organization
+  const currentUser = await prisma.user.findUnique({
+    where: { id: auth.userId },
+    select: { organizationId: true, role: true }
+  })
+
+  // Must have an organization (unless super admin)
+  if (!currentUser?.organizationId && currentUser?.role !== 'SUPER_ADMIN') {
     throw createError({
       statusCode: 403,
-      message: 'Access denied. Admin privileges required.'
+      message: 'No organization associated with your account'
     })
   }
 
+  // Build where clause - org admins only see their org's users
+  const whereClause: any = {}
+  if (currentUser?.organizationId) {
+    whereClause.organizationId = currentUser.organizationId
+  }
+
   const users = await prisma.user.findMany({
+    where: whereClause,
     select: {
       id: true,
       email: true,
@@ -28,4 +41,3 @@ export default defineEventHandler(async (event) => {
 
   return users
 })
-

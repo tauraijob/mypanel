@@ -494,6 +494,135 @@
           </div>
         </div>
       </template>
+
+      <template #account>
+        <div class="glass-card p-6 mt-4 space-y-8">
+          <h2 class="text-lg font-semibold text-white">Account Management</h2>
+          
+          <!-- Data Backup Section -->
+          <div class="space-y-6">
+            <div class="flex items-start gap-4 p-5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
+                <UIcon name="i-lucide-download-cloud" class="w-6 h-6 text-blue-400" />
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-white mb-1">Download Complete Backup</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                  Download all your data as a JSON file: clients, services, invoices, quotations, payments, and settings.
+                </p>
+                <UButton 
+                  color="primary" 
+                  icon="i-lucide-download"
+                  :loading="downloadingBackup"
+                  @click="downloadBackup"
+                >
+                  Download Backup
+                </UButton>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <UIcon name="i-lucide-mail" class="w-6 h-6 text-emerald-400" />
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-white mb-1">Email Backup to Yourself</h3>
+                <p class="text-slate-400 text-sm mb-4">
+                  Send a complete backup to your email address. Great for keeping a secure off-site copy.
+                </p>
+                <UButton 
+                  color="success" 
+                  variant="soft"
+                  icon="i-lucide-send"
+                  :loading="sendingBackupEmail"
+                  @click="sendBackupEmail"
+                >
+                  Send Backup to Email
+                </UButton>
+              </div>
+            </div>
+          </div>
+
+          <USeparator />
+
+          <!-- Danger Zone -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-rose-400 flex items-center gap-2">
+              <UIcon name="i-lucide-alert-triangle" class="w-5 h-5" />
+              Danger Zone
+            </h3>
+            
+            <div class="p-5 rounded-xl bg-rose-500/10 border border-rose-500/30">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center shrink-0">
+                  <UIcon name="i-lucide-trash-2" class="w-6 h-6 text-rose-400" />
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-lg font-semibold text-white mb-1">Delete Account</h4>
+                  <p class="text-slate-400 text-sm mb-4">
+                    Permanently delete your organization and all associated data. This action <strong class="text-rose-400">cannot be undone</strong>.
+                  </p>
+                  
+                  <div v-if="!showDeleteConfirm">
+                    <UButton 
+                      color="error" 
+                      variant="soft"
+                      icon="i-lucide-trash-2"
+                      @click="showDeleteConfirm = true"
+                    >
+                      Delete My Account
+                    </UButton>
+                  </div>
+                  
+                  <div v-else class="space-y-4">
+                    <div class="p-4 bg-rose-500/20 rounded-lg">
+                      <p class="text-rose-200 text-sm font-medium mb-3">
+                        ⚠️ This will permanently delete:
+                      </p>
+                      <ul class="text-rose-300 text-sm space-y-1">
+                        <li>• All your clients and their data</li>
+                        <li>• All services and categories</li>
+                        <li>• All invoices and quotations</li>
+                        <li>• All payment records</li>
+                        <li>• All email logs</li>
+                        <li>• Your organization settings</li>
+                        <li>• Your user account</li>
+                      </ul>
+                    </div>
+                    
+                    <UFormField label="Type 'DELETE MY ACCOUNT' to confirm">
+                      <UInput 
+                        v-model="deleteConfirmation" 
+                        placeholder="DELETE MY ACCOUNT"
+                        class="font-mono"
+                      />
+                    </UFormField>
+                    
+                    <div class="flex gap-3">
+                      <UButton 
+                        color="error"
+                        icon="i-lucide-trash-2"
+                        :loading="deletingAccount"
+                        :disabled="deleteConfirmation !== 'DELETE MY ACCOUNT'"
+                        @click="deleteAccount"
+                      >
+                        Permanently Delete
+                      </UButton>
+                      <UButton 
+                        color="neutral"
+                        variant="ghost"
+                        @click="showDeleteConfirm = false; deleteConfirmation = ''"
+                      >
+                        Cancel
+                      </UButton>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
     </UTabs>
   </div>
 </template>
@@ -511,6 +640,11 @@ const saving = ref(false)
 const uploading = ref(false)
 const exportingJson = ref(false)
 const exportingCsv = ref(false)
+const downloadingBackup = ref(false)
+const sendingBackupEmail = ref(false)
+const deletingAccount = ref(false)
+const showDeleteConfirm = ref(false)
+const deleteConfirmation = ref('')
 const fileInput = ref<HTMLInputElement | null>(null)
 const settings = ref({
   companyName: '',
@@ -548,7 +682,8 @@ const tabs = [
   { label: 'Invoicing', slot: 'invoicing', icon: 'i-lucide-file-text' },
   { label: 'Reminders', slot: 'reminders', icon: 'i-lucide-bell' },
   { label: 'Email (SMTP)', slot: 'email', icon: 'i-lucide-mail' },
-  { label: 'Backup', slot: 'backup', icon: 'i-lucide-download' }
+  { label: 'Backup', slot: 'backup', icon: 'i-lucide-download' },
+  { label: 'Account', slot: 'account', icon: 'i-lucide-shield' }
 ]
 
 const currencyOptions = [
@@ -819,6 +954,106 @@ const importData = async () => {
     })
   } finally {
     importing.value = false
+  }
+}
+
+// Account Management Functions
+const downloadBackup = async () => {
+  downloadingBackup.value = true
+  try {
+    const token = localStorage.getItem('auth_token')
+    const backup = await $fetch('/api/account/backup', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    // Create and download JSON file
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mypanel-backup-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    
+    toast.add({
+      title: 'Backup Downloaded',
+      description: 'Your complete data backup has been downloaded.',
+      color: 'success'
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Backup Failed',
+      description: error.data?.message || 'Could not download backup.',
+      color: 'error'
+    })
+  } finally {
+    downloadingBackup.value = false
+  }
+}
+
+const sendBackupEmail = async () => {
+  sendingBackupEmail.value = true
+  try {
+    const token = localStorage.getItem('auth_token')
+    const response = await $fetch('/api/account/backup-email', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }
+    }) as any
+    
+    toast.add({
+      title: 'Backup Sent',
+      description: response.message || 'Backup has been sent to your email.',
+      color: 'success'
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Email Failed',
+      description: error.data?.message || 'Could not send backup email.',
+      color: 'error'
+    })
+  } finally {
+    sendingBackupEmail.value = false
+  }
+}
+
+const deleteAccount = async () => {
+  if (deleteConfirmation.value !== 'DELETE MY ACCOUNT') {
+    toast.add({
+      title: 'Confirmation Required',
+      description: 'Please type "DELETE MY ACCOUNT" to confirm.',
+      color: 'warning'
+    })
+    return
+  }
+
+  deletingAccount.value = true
+  try {
+    const token = localStorage.getItem('auth_token')
+    await $fetch('/api/account/delete', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { confirmation: deleteConfirmation.value }
+    })
+    
+    // Clear auth and redirect to homepage
+    localStorage.removeItem('auth_token')
+    toast.add({
+      title: 'Account Deleted',
+      description: 'Your account and all data have been permanently deleted.',
+      color: 'success'
+    })
+    
+    await navigateTo('/')
+  } catch (error: any) {
+    toast.add({
+      title: 'Deletion Failed',
+      description: error.data?.message || 'Could not delete account.',
+      color: 'error'
+    })
+  } finally {
+    deletingAccount.value = false
   }
 }
 
