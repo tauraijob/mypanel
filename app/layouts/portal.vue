@@ -13,7 +13,7 @@
         <div class="flex items-center gap-4">
           <span class="text-sm text-slate-400">Welcome back</span>
           <UButton 
-            color="gray" 
+            color="neutral" 
             variant="ghost" 
             icon="i-lucide-log-out"
             @click="logout"
@@ -50,8 +50,4 @@ const logout = () => {
 }
 </script>
 
-<style>
-body {
-  @apply bg-slate-950;
-}
-</style>
+
