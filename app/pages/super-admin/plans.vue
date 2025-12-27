@@ -2,8 +2,8 @@
   <div>
     <!-- Page Content with Layout -->
     <NuxtLayout name="super-admin">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-white">Subscription Plans</h1>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Subscription Plans</h1>
         <UButton color="primary" icon="i-lucide-plus" @click="openCreateModal">
           Create Plan
         </UButton>
@@ -54,7 +54,7 @@
                 <UInput v-model="formData.name" placeholder="e.g. Professional" required />
               </UFormField>
               
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <UFormField label="Monthly Price ($) *">
                   <UInput v-model="formData.monthlyPrice" type="number" step="0.01" required />
                 </UFormField>
@@ -63,7 +63,7 @@
                 </UFormField>
               </div>
               
-              <div class="grid grid-cols-3 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <UFormField label="Max Clients">
                   <UInput v-model.number="formData.maxClients" type="number" />
                   <p class="text-xs text-slate-500 mt-1">-1 = unlimited</p>

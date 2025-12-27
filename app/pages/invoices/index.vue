@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white">Invoices</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Invoices</h1>
         <p class="text-slate-400 mt-1">Create and manage client invoices</p>
       </div>
       <UButton color="primary" icon="i-lucide-plus" @click="navigateTo('/invoices/new')">
@@ -69,8 +69,8 @@
 
     <!-- Filters -->
     <div class="glass-card p-4">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div class="relative w-64">
+      <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div class="relative flex-1 sm:flex-none sm:w-64">
           <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
           <UInput
             v-model="search"
@@ -80,11 +80,11 @@
             @input="debouncedFetch"
           />
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto pb-1 -mb-1">
           <button
             v-for="status in statusFilters"
             :key="status.value"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            class="px-4 py-2 rounded-lg text-sm font-medium transition-all shrink-0"
             :class="statusFilter === status.value 
               ? 'bg-blue-500 text-white' 
               : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'"
@@ -98,7 +98,8 @@
 
     <!-- Invoices Table -->
     <div class="glass-card overflow-hidden">
-      <table class="w-full">
+      <div class="overflow-x-auto">
+      <table class="w-full min-w-[800px]">
         <thead>
           <tr class="border-b border-white/10">
             <th class="text-left p-4 text-slate-400 font-medium">Invoice</th>
@@ -218,6 +219,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pagination.totalPages > 1" class="flex items-center justify-between p-4 border-t border-white/10">

@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white">User Management</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">User Management</h1>
         <p class="text-slate-400 mt-1">Manage system users and their access levels</p>
       </div>
       <UButton color="primary" icon="i-lucide-user-plus" @click="openModal()">
@@ -61,8 +61,8 @@
 
     <!-- Filters -->
     <div class="glass-card p-4">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div class="relative w-64">
+      <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div class="relative flex-1 sm:flex-none sm:w-64">
           <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
           <UInput
             v-model="search"
@@ -71,13 +71,14 @@
             :ui="{ base: 'pl-10' }"
           />
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto pb-1 -mb-1">
           <UButton
             v-for="role in roleOptions"
             :key="role.value"
             :color="roleFilter === role.value ? 'primary' : 'neutral'"
             :variant="roleFilter === role.value ? 'solid' : 'ghost'"
             size="sm"
+            class="shrink-0"
             @click="roleFilter = role.value"
           >
             {{ role.label }}
@@ -88,7 +89,8 @@
 
     <!-- Users Table -->
     <div class="glass-card overflow-hidden">
-      <table class="w-full">
+      <div class="overflow-x-auto">
+      <table class="w-full min-w-[800px]">
         <thead>
           <tr class="border-b border-white/10">
             <th class="text-left p-4 text-slate-400 font-medium">User</th>
@@ -170,6 +172,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <!-- Add/Edit Modal -->

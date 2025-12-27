@@ -69,7 +69,7 @@
 
             <USeparator />
 
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <UFormField label="Company Name *" name="companyName">
                 <UInput v-model="settings.companyName" placeholder="Your Company Name" required />
               </UFormField>
@@ -78,7 +78,7 @@
               </UFormField>
             </div>
 
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <UFormField label="Phone" name="companyPhone">
                 <UInput v-model="settings.companyPhone" placeholder="+1 234 567 890" />
               </UFormField>
@@ -91,7 +91,7 @@
               <UTextarea v-model="settings.companyAddress" placeholder="Street address" rows="2" />
             </UFormField>
 
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <UFormField label="City" name="companyCity">
                 <UInput v-model="settings.companyCity" placeholder="City" />
               </UFormField>

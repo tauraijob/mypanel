@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white">Payments</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Payments</h1>
         <p class="text-slate-400 mt-1">Track all payment transactions</p>
       </div>
     </div>
@@ -15,11 +15,11 @@
           <UIcon name="i-lucide-trending-up" class="w-5 h-5 text-emerald-400" />
           Revenue Overview
         </h2>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto pb-1 -mb-1">
           <button
             v-for="period in periods"
             :key="period.value"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0"
             :class="selectedPeriod === period.value 
               ? 'bg-emerald-500 text-white' 
               : 'bg-white/5 text-slate-400 hover:bg-white/10'"
@@ -140,8 +140,8 @@
 
     <!-- Filters -->
     <div class="glass-card p-4">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div class="relative w-64">
+      <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+        <div class="relative flex-1 sm:flex-none sm:w-64">
           <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
           <UInput
             v-model="search"
@@ -151,11 +151,11 @@
             @input="debouncedFetch"
           />
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto pb-1 -mb-1">
           <button
             v-for="method in methodFilters"
             :key="method.value"
-            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shrink-0"
             :class="methodFilter === method.value 
               ? 'bg-emerald-500 text-white' 
               : 'bg-white/5 text-slate-400 hover:bg-white/10'"
@@ -170,7 +170,8 @@
 
     <!-- Payments Table -->
     <div class="glass-card overflow-hidden">
-      <table class="w-full">
+      <div class="overflow-x-auto">
+      <table class="w-full min-w-[900px]">
         <thead>
           <tr class="border-b border-white/10">
             <th class="text-left p-4 text-slate-400 font-medium">Date</th>
@@ -270,6 +271,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pagination.totalPages > 1" class="flex items-center justify-between p-4 border-t border-white/10">

@@ -3,7 +3,7 @@
     <NuxtLayout name="super-admin">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white">Platform Dashboard</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Platform Dashboard</h1>
         <p class="text-slate-400 mt-1">Overview of your SaaS platform</p>
       </div>
 

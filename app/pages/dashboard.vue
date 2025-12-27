@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-white">Dashboard</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
         <p class="text-slate-400 mt-1">Welcome back! Here's your business overview.</p>
       </div>
       <div class="flex items-center gap-3">
@@ -74,13 +74,14 @@
           <UIcon name="i-lucide-bar-chart-3" class="w-5 h-5 text-blue-400" />
           Revenue & Invoices Report
         </h2>
-        <div class="flex gap-2">
+        <div class="flex gap-2 overflow-x-auto pb-1 -mb-1">
           <UButton 
             v-for="p in periods" 
             :key="p.value"
             :variant="selectedPeriod === p.value ? 'solid' : 'ghost'"
             :color="selectedPeriod === p.value ? 'primary' : 'neutral'"
             size="sm"
+            class="shrink-0"
             @click="changePeriod(p.value)"
           >
             {{ p.label }}
