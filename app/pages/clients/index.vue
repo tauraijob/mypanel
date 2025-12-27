@@ -14,13 +14,16 @@
     <!-- Filters -->
     <div class="glass-card p-4">
       <div class="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-        <UInput
-          v-model="search"
-          placeholder="Search clients..."
-          icon="i-lucide-search"
-          class="w-full sm:w-64"
-          @input="debouncedFetch"
-        />
+        <div class="relative w-full sm:w-64">
+          <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <UInput
+            v-model="search"
+            placeholder="Search clients..."
+            class="w-full pl-10"
+            :ui="{ base: 'pl-10' }"
+            @input="debouncedFetch"
+          />
+        </div>
         <USelect
           v-model="statusFilter"
           :items="statusOptions"

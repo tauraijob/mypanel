@@ -11,36 +11,163 @@ datasource db {
 }
 
 // ============================================
+// ORGANIZATIONS (Multi-tenant)
+// ============================================
+model Organization {
+  id             Int      @id @default(autoincrement())
+  name           String
+  slug           String   @unique  // For URL: mypanel.wecode.co.zw/org/wecode
+  email          String
+  phone          String?
+  
+  // Subscription
+  planId         Int?
+  plan           SubscriptionPlan? @relation(fields: [planId], references: [id])
+  subscriptionStatus SubscriptionStatus @default(TRIAL)
+  subscriptionStart  DateTime?
+  subscriptionEnd    DateTime?
+  billingCycle   String   @default("MONTHLY") // MONTHLY or YEARLY
+  
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  users          User[]
+  clients        Client[]
+  services       Service[]
+  invoices       Invoice[]
+  payments       Payment[]
+  quotations     Quotation[]
+  settings       Settings?
+  categories     ServiceCategory[]
+  emailLogs      EmailLog[]
+
+  @@map("organizations")
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+// ============================================
+// SUBSCRIPTION PLANS (Editable by Super Admin)
+// ============================================
+model SubscriptionPlan {
+  id             Int       @id @default(autoincrement())
+  name           String    @unique
+  description    String?   @db.Text
+  
+  // Pricing
+  monthlyPrice   Decimal   @db.Decimal(10, 2)
+  yearlyPrice    Decimal   @db.Decimal(10, 2)
+  
+  // Limits
+  maxClients     Int       @default(-1) // -1 = unlimited
+  maxUsers       Int       @default(-1)
+  maxServices    Int       @default(-1)
+  
+  // Features (comma-separated or JSON)
+  features       String?   @db.Text
+  
+  isActive       Boolean   @default(true)
+  sortOrder      Int       @default(0)
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  organizations  Organization[]
+
+  @@map("subscription_plans")
+}
+
+// ============================================
+// SUPER ADMIN SETTINGS
+// ============================================
+model SuperAdminSettings {
+  id             Int      @id @default(autoincrement())
+  
+  // Platform Info
+  platformName   String   @default("MyPanel")
+  platformUrl    String?
+  supportEmail   String?
+  
+  // SMTP Email Settings
+  smtpHost       String?
+  smtpPort       Int      @default(587)
+  smtpUser       String?
+  smtpPass       String?
+  smtpFrom       String?
+  smtpSecure     Boolean  @default(false)
+  
+  // PayPal
+  paypalEmail    String?
+  paypalEnabled  Boolean  @default(false)
+  
+  // Paynow
+  paynowIntegrationId    String?
+  paynowIntegrationKey   String?
+  paynowEnabled          Boolean @default(false)
+  
+  // Branding
+  logoUrl        String?
+  primaryColor   String   @default("#3b82f6")
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("super_admin_settings")
+}
+
+
+// ============================================
 // USERS & ROLES
 // ============================================
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  avatar    String?
-  role      UserRole @default(ADMIN)
-  isActive  Boolean  @default(true)
-  lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  password       String
+  name           String
+  phone          String?
+  avatar         String?
+  role           UserRole  @default(ADMIN)
+  isActive       Boolean   @default(true)
+  lastLogin      DateTime?
+  
+  // Email verification
+  emailVerified       Boolean   @default(false)
+  verificationToken   String?
+  verificationExpires DateTime?
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Organization relation (null for SUPER_ADMIN)
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("users")
 }
 
 enum UserRole {
-  ADMIN       // Full access to everything
-  SALES       // Can manage clients, invoices, quotations, view services, record payments
-  SUPPORT     // Can view clients, services, create support tickets (future)
-  VIEWER      // Read-only access to reports and data
+  SUPER_ADMIN // Platform super admin (you)
+  ADMIN       // Organization admin - full access within org
+  SALES       // Can manage clients, invoices, quotations, record payments
+  SUPPORT     // Can view clients, services
+  VIEWER      // Read-only access
 }
 
 // ============================================
-// COMPANY SETTINGS
+// ORGANIZATION SETTINGS
 // ============================================
 model Settings {
   id              Int      @id @default(autoincrement())
+  
+  // Company Info
   companyName     String   @default("My Company")
   companyEmail    String?
   companyPhone    String?
@@ -52,6 +179,8 @@ model Settings {
   companyWebsite  String?
   companyTaxId    String?
   logoUrl         String?
+  
+  // Invoice Settings
   invoicePrefix   String   @default("INV-")
   quotePrefix     String   @default("QUO-")
   currency        String   @default("USD")
@@ -63,19 +192,31 @@ model Settings {
   bankDetails     String?  @db.Text
   
   // Email reminder settings
-  reminderDays    String   @default("14,7,3,1") // days before due date
-  overdueDays     String   @default("1,3,7,14") // days after due date
+  reminderDays    String   @default("14,7,3,1")
+  overdueDays     String   @default("1,3,7,14")
   autoSuspendDays Int      @default(14)
   
-  // SMTP Settings
+  // SMTP Settings (per-org)
   smtpHost        String?
   smtpPort        Int?
   smtpUser        String?
   smtpPass        String?
   smtpFrom        String?
   
+  // Payment Gateways (Collecting from Clients)
+  paypalClientId  String?
+  paypalSecret    String?
+  paypalMode      String?   @default("sandbox")
+  
+  paynowIntegrationId  String?
+  paynowIntegrationKey String?
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // Organization relation
+  organizationId  Int      @unique
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("settings")
 }
@@ -86,7 +227,7 @@ model Settings {
 model Client {
   id             Int       @id @default(autoincrement())
   name           String
-  email          String    @unique
+  email          String
   phone          String?
   company        String?
   
@@ -107,8 +248,18 @@ model Client {
   notes          String?   @db.Text
   status         ClientStatus @default(ACTIVE)
   
+  // Portal Access
+  password       String?
+  portalAccess   Boolean   @default(false)
+  lastLogin      DateTime?
+  resetToken     String?
+  
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  // Organization relation
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Relations
   services       Service[]
@@ -116,6 +267,7 @@ model Client {
   quotations     Quotation[]
   payments       Payment[]
 
+  @@unique([email, organizationId])
   @@map("clients")
 }
 
@@ -130,15 +282,20 @@ enum ClientStatus {
 // ============================================
 model ServiceCategory {
   id          Int       @id @default(autoincrement())
-  name        String    @unique
+  name        String
   description String?   @db.Text
   color       String    @default("#3b82f6")
   icon        String    @default("server")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // Organization relation
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   services    Service[]
 
+  @@unique([name, organizationId])
   @@map("service_categories")
 }
 
@@ -163,13 +320,17 @@ model Service {
   status         ServiceStatus @default(PENDING)
   
   // Metadata
-  domain         String?       // For hosting/website services
-  server         String?       // Server details
-  username       String?       // Service username
+  domain         String?
+  server         String?
+  username       String?
   notes          String?       @db.Text
   
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  // Organization relation
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Relations
   clientId       Int
@@ -205,7 +366,7 @@ enum ServiceStatus {
 // ============================================
 model Invoice {
   id             Int           @id @default(autoincrement())
-  invoiceNumber  String        @unique
+  invoiceNumber  String
   
   // Dates
   issueDate      DateTime      @default(now())
@@ -233,6 +394,10 @@ model Invoice {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
+  // Organization relation
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   // Relations
   clientId       Int
   client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -240,6 +405,7 @@ model Invoice {
   items          InvoiceItem[]
   payments       Payment[]
 
+  @@unique([invoiceNumber, organizationId])
   @@map("invoices")
 }
 
@@ -284,11 +450,15 @@ model Payment {
   amount        Decimal       @db.Decimal(10, 2)
   paymentDate   DateTime      @default(now())
   paymentMethod PaymentMethod @default(BANK_TRANSFER)
-  reference     String?       // Transaction reference/ID
+  reference     String?
   notes         String?       @db.Text
   
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  // Organization relation
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   // Relations
   invoiceId     Int
@@ -305,6 +475,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   CREDIT_CARD
   PAYPAL
+  PAYNOW
   MOBILE_MONEY
   CRYPTO
   OTHER
@@ -315,7 +486,7 @@ enum PaymentMethod {
 // ============================================
 model Quotation {
   id              Int             @id @default(autoincrement())
-  quoteNumber     String          @unique
+  quoteNumber     String
   
   // Dates
   issueDate       DateTime        @default(now())
@@ -337,12 +508,17 @@ model Quotation {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  // Organization relation
+  organizationId  Int
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   // Relations
   clientId        Int
   client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
   
   items           QuotationItem[]
 
+  @@unique([quoteNumber, organizationId])
   @@map("quotations")
 }
 
@@ -376,7 +552,7 @@ model QuotationItem {
 }
 
 // ============================================
-// EMAIL LOGS (Track all sent emails)
+// EMAIL LOGS
 // ============================================
 model EmailLog {
   id          Int       @id @default(autoincrement())
@@ -388,10 +564,14 @@ model EmailLog {
   error       String?   @db.Text
   
   // Reference to related entity
-  referenceType String?  // "invoice", "quotation", "service"
+  referenceType String?
   referenceId   Int?
   
   sentAt      DateTime  @default(now())
+
+  // Organization relation
+  organizationId Int?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("email_logs")
 }
@@ -409,4 +589,26 @@ enum EmailType {
   PAYMENT_RECEIVED
   WELCOME
   CUSTOM
+}
+
+// ============================================
+// ORGANIZATION PAYMENTS (Platform Subscriptions)
+// ============================================
+model OrganizationPayment {
+  id              Int      @id @default(autoincrement())
+  organizationId  Int
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  paymentMethod   String   // "PAYPAL" or "PAYNOW"
+  transactionId   String?
+  status          String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  
+  // Subscription period
+  periodStart     DateTime?
+  periodEnd       DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("organization_payments")
 }

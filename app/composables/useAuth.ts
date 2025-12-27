@@ -3,6 +3,7 @@ export interface AuthUser {
   email: string
   name: string
   role: string
+  organizationId?: number | null
 }
 
 const authUser = ref<AuthUser | null>(null)
@@ -18,7 +19,7 @@ export const useAuth = () => {
         authUser.value = null
         return
       }
-      
+
       const user = await $fetch('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -38,7 +39,7 @@ export const useAuth = () => {
       method: 'POST',
       body: { email, password }
     })
-    
+
     if (response.token) {
       localStorage.setItem('auth_token', response.token)
       authUser.value = response.user
@@ -55,7 +56,7 @@ export const useAuth = () => {
 
   const hasPermission = (permission: string): boolean => {
     if (!authUser.value) return false
-    
+
     const role = authUser.value.role
     const permissions: Record<string, string[]> = {
       // User Management
@@ -63,54 +64,54 @@ export const useAuth = () => {
       'users.create': ['ADMIN'],
       'users.edit': ['ADMIN'],
       'users.delete': ['ADMIN'],
-      
+
       // Client Management
       'clients.view': ['ADMIN', 'SALES', 'SUPPORT', 'VIEWER'],
       'clients.create': ['ADMIN', 'SALES'],
       'clients.edit': ['ADMIN', 'SALES'],
       'clients.delete': ['ADMIN'],
-      
+
       // Services
       'services.view': ['ADMIN', 'SALES', 'SUPPORT', 'VIEWER'],
       'services.create': ['ADMIN', 'SALES'],
       'services.edit': ['ADMIN', 'SALES'],
       'services.delete': ['ADMIN'],
       'services.terminate': ['ADMIN'],
-      
+
       // Invoices
       'invoices.view': ['ADMIN', 'SALES', 'VIEWER'],
       'invoices.create': ['ADMIN', 'SALES'],
       'invoices.edit': ['ADMIN', 'SALES'],
       'invoices.send': ['ADMIN', 'SALES'],
       'invoices.delete': ['ADMIN'],
-      
+
       // Quotations
       'quotations.view': ['ADMIN', 'SALES', 'VIEWER'],
       'quotations.create': ['ADMIN', 'SALES'],
       'quotations.edit': ['ADMIN', 'SALES'],
       'quotations.send': ['ADMIN', 'SALES'],
       'quotations.delete': ['ADMIN'],
-      
+
       // Payments
       'payments.view': ['ADMIN', 'SALES', 'VIEWER'],
       'payments.create': ['ADMIN', 'SALES'],
       'payments.edit': ['ADMIN'],
       'payments.delete': ['ADMIN'],
-      
+
       // Reports & Dashboard
       'dashboard.view': ['ADMIN', 'SALES', 'SUPPORT', 'VIEWER'],
       'reports.view': ['ADMIN', 'VIEWER'],
       'reports.export': ['ADMIN'],
-      
+
       // Settings
       'settings.view': ['ADMIN'],
       'settings.edit': ['ADMIN'],
-      
+
       // Email Logs
       'email-logs.view': ['ADMIN', 'SALES'],
       'email-logs.retry': ['ADMIN'],
     }
-    
+
     return permissions[permission]?.includes(role) ?? false
   }
 

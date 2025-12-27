@@ -55,8 +55,35 @@
         </div>
       </div>
 
+      <!-- Portal Access -->
+      <div class="glass-card p-6">
+          <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <UIcon name="i-lucide-lock" class="w-5 h-5 text-purple-400" />
+              Portal Access
+          </h2>
+          <div class="space-y-4">
+              <div v-if="client?.lastLogin">
+                  <p class="text-sm text-slate-400">Last Login</p>
+                  <p class="text-white">{{ new Date(client.lastLogin).toLocaleString() }}</p>
+              </div>
+              <div v-else>
+                  <p class="text-sm text-slate-400">Status</p>
+                  <p class="text-slate-500 italic">Never logged in</p>
+              </div>
+              
+              <div class="pt-2">
+                  <UButton variant="outline" color="white" block icon="i-lucide-key" @click="isPasswordModalOpen = true">
+                      {{ client?.password ? 'Reset Password' : 'Set Password' }}
+                  </UButton>
+                  <p class="text-xs text-slate-500 mt-2 text-center">
+                      Allows client to log in at /portal
+                  </p>
+              </div>
+          </div>
+      </div>
+
       <!-- Services -->
-      <div class="lg:col-span-2 glass-card p-6">
+      <div class="lg:col-span-1 glass-card p-6">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-white flex items-center gap-2">
             <UIcon name="i-lucide-server" class="w-5 h-5 text-emerald-400" />
@@ -160,6 +187,23 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Password Modal -->
+    <UModal v-model="isPasswordModalOpen">
+        <div class="p-6 bg-slate-900">
+            <h3 class="text-lg font-bold text-white mb-4">Set Client Password</h3>
+            <form @submit.prevent="updatePassword" class="space-y-4">
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <input v-model="newPassword" type="password" class="form-input" required minlength="6" />
+                </div>
+                <div class="flex justify-end gap-2 mt-6">
+                    <UButton color="gray" variant="ghost" @click="isPasswordModalOpen = false">Cancel</UButton>
+                    <UButton type="submit" color="primary" :loading="updatingPassword">Save Password</UButton>
+                </div>
+            </form>
+        </div>
+    </UModal>
   </div>
 </template>
 
@@ -172,6 +216,10 @@ definePageMeta({
 
 const route = useRoute()
 const client = ref<any>(null)
+const isPasswordModalOpen = ref(false)
+const newPassword = ref('')
+const updatingPassword = ref(false)
+const toast = useToast()
 
 const fetchClient = async () => {
   try {
@@ -180,6 +228,24 @@ const fetchClient = async () => {
     console.error('Error fetching client:', error)
     navigateTo('/clients')
   }
+}
+
+const updatePassword = async () => {
+    updatingPassword.value = true
+    try {
+        await $fetch(`/api/clients/${route.params.id}/access`, {
+            method: 'PUT',
+            body: { password: newPassword.value }
+        })
+        toast.add({ title: 'Success', description: 'Client password updated' })
+        isPasswordModalOpen.value = false
+        newPassword.value = ''
+        fetchClient() // Refresh
+    } catch (e: any) {
+        toast.add({ title: 'Error', description: e.data?.message || 'Failed to update password', color: 'red' })
+    } finally {
+        updatingPassword.value = false
+    }
 }
 
 const formatDate = (date: string) => {

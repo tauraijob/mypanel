@@ -70,13 +70,16 @@
     <!-- Filters -->
     <div class="glass-card p-4">
       <div class="flex flex-wrap gap-4 items-center">
-        <UInput
-          v-model="search"
-          placeholder="Search invoices..."
-          icon="i-lucide-search"
-          class="w-64"
-          @input="debouncedFetch"
-        />
+        <div class="relative w-64">
+          <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <UInput
+            v-model="search"
+            placeholder="Search invoices..."
+            class="w-full pl-10"
+            :ui="{ base: 'pl-10' }"
+            @input="debouncedFetch"
+          />
+        </div>
         <div class="flex gap-2">
           <button
             v-for="status in statusFilters"

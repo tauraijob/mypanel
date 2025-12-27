@@ -8,28 +8,48 @@ interface EmailOptions {
   type: string
   referenceType?: string
   referenceId?: number
+  organizationId?: number
 }
 
-export const getEmailTransporter = async () => {
-  // Try to get settings from database first
-  const settings = await prisma.settings.findFirst()
+export const getEmailTransporter = async (overrideConfig?: any) => {
+  // Use override config if provided (for testing settings before saving)
+  if (overrideConfig) {
+    return nodemailer.createTransport(overrideConfig)
+  }
 
-  const config = {
-    host: settings?.smtpHost || process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: settings?.smtpPort || parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: {
-      user: settings?.smtpUser || process.env.SMTP_USER,
-      pass: settings?.smtpPass || process.env.SMTP_PASS
-    }
+  // First try SuperAdminSettings for platform-wide SMTP (super admin configured)
+  const platformSettings = await prisma.superAdminSettings.findFirst()
+
+  // Fall back to organization settings if no platform config
+  const orgSettings = await prisma.settings.findFirst()
+
+  // Priority: Platform Settings > Org Settings > Environment Variables
+  const host = platformSettings?.smtpHost || orgSettings?.smtpHost || process.env.SMTP_HOST || 'smtp.gmail.com'
+  const port = platformSettings?.smtpPort || orgSettings?.smtpPort || parseInt(process.env.SMTP_PORT || '587')
+  const secure = platformSettings?.smtpSecure || false
+  const user = platformSettings?.smtpUser || orgSettings?.smtpUser || process.env.SMTP_USER
+  const pass = platformSettings?.smtpPass || orgSettings?.smtpPass || process.env.SMTP_PASS
+
+  const config: any = {
+    host,
+    port,
+    secure
+  }
+
+  // Only add auth if user AND pass are present to avoid "Missing credentials for PLAIN" error
+  if (user && pass) {
+    config.auth = { user, pass }
   }
 
   return nodemailer.createTransport(config)
 }
 
 export const sendEmail = async (options: EmailOptions) => {
-  const settings = await prisma.settings.findFirst()
-  const from = settings?.smtpFrom || process.env.SMTP_FROM || 'MyPanel <noreply@mypanel.com>'
+  // Get platform settings for from address
+  const platformSettings = await prisma.superAdminSettings.findFirst()
+  const orgSettings = await prisma.settings.findFirst()
+
+  const from = platformSettings?.smtpFrom || orgSettings?.smtpFrom || process.env.SMTP_FROM || 'MyPanel <noreply@mypanel.com>'
 
   try {
     const transporter = await getEmailTransporter()
@@ -50,7 +70,8 @@ export const sendEmail = async (options: EmailOptions) => {
         type: options.type as any,
         status: 'sent',
         referenceType: options.referenceType,
-        referenceId: options.referenceId
+        referenceId: options.referenceId,
+        organizationId: options.organizationId
       }
     })
 
@@ -66,7 +87,8 @@ export const sendEmail = async (options: EmailOptions) => {
         status: 'failed',
         error: error.message,
         referenceType: options.referenceType,
-        referenceId: options.referenceId
+        referenceId: options.referenceId,
+        organizationId: options.organizationId
       }
     })
 
@@ -74,6 +96,7 @@ export const sendEmail = async (options: EmailOptions) => {
     return { success: false, error: error.message }
   }
 }
+
 
 // Navy Blue Glassmorphism Email Base Styles
 const baseStyles = `
@@ -536,5 +559,79 @@ export const emailTemplates = {
         </div>
       </div>
     `)
+  }),
+
+  // Email Verification Template
+  emailVerification: (data: { name: string; verifyUrl: string }) => ({
+    subject: 'Verify Your Email - MyPanel',
+    html: emailWrapper(`
+      <div class="container">
+        <div class="header">
+          <div class="header-icon">✉️</div>
+          <h1>Verify Your Email</h1>
+          <p class="header-subtitle">One more step to activate your account</p>
+        </div>
+        <div class="content">
+          <p>Hi <strong>${data.name}</strong>,</p>
+          <p>Thank you for signing up for MyPanel! Please verify your email address by clicking the button below:</p>
+          
+          <div class="btn-center">
+            <a href="${data.verifyUrl}" class="btn">Verify Email Address</a>
+          </div>
+          
+          <div class="alert-warning">
+            <strong>⏱️ This link expires in 24 hours.</strong><br>
+            If you didn't create this account, you can safely ignore this email.
+          </div>
+          
+          <p class="small-text">If the button doesn't work, copy and paste this link into your browser:<br>
+          <a href="${data.verifyUrl}" class="link">${data.verifyUrl}</a></p>
+        </div>
+        <div class="footer">
+          <p class="company">MyPanel - Client & Invoice Management</p>
+          <p>© ${new Date().getFullYear()} MyPanel. All rights reserved.</p>
+        </div>
+      </div>
+    `)
+  }),
+
+  // Welcome Email (after verification)
+  welcomeEmail: (data: { name: string; organizationName: string; loginUrl: string }) => ({
+    subject: 'Welcome to MyPanel! 🎉',
+    html: emailWrapper(`
+      <div class="container">
+        <div class="header">
+          <div class="header-icon">🎉</div>
+          <h1>Welcome to MyPanel!</h1>
+          <p class="header-subtitle">Your account is now active</p>
+        </div>
+        <div class="content">
+          <p>Hi <strong>${data.name}</strong>,</p>
+          <p>Congratulations! Your email has been verified and your organization <strong>${data.organizationName}</strong> is now active.</p>
+          
+          <div class="alert-success">
+            <strong>✅ Your 14-day free trial has started!</strong><br>
+            Explore all features with no limitations.
+          </div>
+          
+          <p>Here's what you can do with MyPanel:</p>
+          <ul style="color: #cbd5e1; padding-left: 20px;">
+            <li>Add and manage your clients</li>
+            <li>Create and track services</li>
+            <li>Generate professional invoices & quotations</li>
+            <li>Track payments and send reminders</li>
+          </ul>
+          
+          <div class="btn-center">
+            <a href="${data.loginUrl}" class="btn">Go to Dashboard</a>
+          </div>
+        </div>
+        <div class="footer">
+          <p class="company">MyPanel - Client & Invoice Management</p>
+          <p>Need help? Contact us at support@wecode.co.zw</p>
+        </div>
+      </div>
+    `)
   })
 }
+

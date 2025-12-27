@@ -62,12 +62,15 @@
     <!-- Filters -->
     <div class="glass-card p-4">
       <div class="flex flex-wrap gap-4 items-center">
-        <UInput
-          v-model="search"
-          placeholder="Search users..."
-          icon="i-lucide-search"
-          class="w-64"
-        />
+        <div class="relative w-64">
+          <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <UInput
+            v-model="search"
+            placeholder="Search users..."
+            class="w-full pl-10"
+            :ui="{ base: 'pl-10' }"
+          />
+        </div>
         <div class="flex gap-2">
           <UButton
             v-for="role in roleOptions"
@@ -376,7 +379,7 @@
 import { format } from 'date-fns'
 
 definePageMeta({
-  layout: 'dashboard',
+  layout: 'default',
   middleware: 'auth'
 })
 

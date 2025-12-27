@@ -9,9 +9,20 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Find user
+  // Find user with organization
   const user = await prisma.user.findUnique({
-    where: { email }
+    where: { email },
+    include: {
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          isActive: true,
+          subscriptionStatus: true
+        }
+      }
+    }
   })
 
   if (!user) {
@@ -26,6 +37,31 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 403,
       message: 'Your account has been deactivated. Please contact an administrator.'
+    })
+  }
+
+  // Check if organization is active (for non-super admins)
+  if (user.role !== 'SUPER_ADMIN' && user.organization) {
+    if (!user.organization.isActive) {
+      throw createError({
+        statusCode: 403,
+        message: 'Your organization has been suspended. Please contact support.'
+      })
+    }
+    if (user.organization.subscriptionStatus === 'EXPIRED' || user.organization.subscriptionStatus === 'CANCELLED') {
+      throw createError({
+        statusCode: 403,
+        message: 'Your subscription has expired. Please renew to continue using the service.'
+      })
+    }
+  }
+
+  // Check if email is verified (for non-super admins)
+  if (user.role !== 'SUPER_ADMIN' && !user.emailVerified) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'EMAIL_NOT_VERIFIED',
+      message: 'Please verify your email before logging in. Check your inbox for the verification link.'
     })
   }
 
@@ -48,7 +84,8 @@ export default defineEventHandler(async (event) => {
   const token = generateToken({
     userId: user.id,
     email: user.email,
-    role: user.role
+    role: user.role,
+    organizationId: user.organizationId
   })
 
   return {
@@ -58,9 +95,9 @@ export default defineEventHandler(async (event) => {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      organizationId: user.organizationId,
+      organization: user.organization
     }
   }
 })
-
-

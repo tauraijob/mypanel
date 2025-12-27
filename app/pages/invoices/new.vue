@@ -17,12 +17,13 @@
           <h2 class="text-lg font-semibold text-white mb-4">Client Details</h2>
           
           <UFormField label="Select Client *" name="clientId" class="relative" style="z-index: 30;">
-            <div class="relative" data-client-dropdown ref="clientDropdownRef">
+            <div class="relative w-full" data-client-dropdown ref="clientDropdownRef">
+              <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
               <UInput
                 v-model="clientSearch"
                 placeholder="Search or select a client..."
-                icon="i-lucide-search"
-                class="w-full"
+                class="w-full pl-10"
+                :ui="{ base: 'pl-10' }"
                 autocomplete="off"
                 @focus="onInputFocus"
                 @input="onClientSearchInput"

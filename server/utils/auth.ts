@@ -35,7 +35,7 @@ export const getAuthUser = (event: H3Event): JWTPayload | null => {
   if (!authHeader?.startsWith('Bearer ')) {
     return null
   }
-  
+
   const token = authHeader.substring(7)
   return verifyToken(token)
 }
@@ -51,4 +51,27 @@ export const requireAuth = (event: H3Event): JWTPayload => {
   return user
 }
 
+export const verifyClientToken = (token: string): any | null => {
+  try {
+    return jwt.verify(token, JWT_SECRET)
+  } catch {
+    return null
+  }
+}
+
+export const requireClientAuth = (event: H3Event): any => {
+  const authHeader = getHeader(event, 'authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw createError({ statusCode: 401, message: 'Unauthorized' })
+  }
+
+  const token = authHeader.substring(7)
+  const client = verifyClientToken(token)
+
+  if (!client || client.role !== 'CLIENT') {
+    throw createError({ statusCode: 403, message: 'Forbidden' })
+  }
+
+  return client
+}
 

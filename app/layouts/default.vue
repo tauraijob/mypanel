@@ -157,7 +157,8 @@ const navigation: NavItem[] = [
   { to: '/payments', label: 'Payments', icon: 'i-lucide-credit-card', permission: 'payments.view' },
   { to: '/email-logs', label: 'Email Logs', icon: 'i-lucide-mail', permission: 'email-logs.view' },
   { to: '/users', label: 'Users', icon: 'i-lucide-users-2', permission: 'users.view' },
-  { to: '/settings', label: 'Settings', icon: 'i-lucide-settings', permission: 'settings.view' }
+  { to: '/settings', label: 'Settings', icon: 'i-lucide-settings', permission: 'settings.view' },
+  { to: '/billing', label: 'Billing', icon: 'i-lucide-wallet' }
 ]
 
 const canAccessRoute = (permission?: string): boolean => {

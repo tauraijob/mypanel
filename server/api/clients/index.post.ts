@@ -1,7 +1,21 @@
-
-
 export default defineEventHandler(async (event) => {
+  const authUser = requireAuth(event)
   const body = await readBody(event)
+
+  // Get user's organization
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { organizationId: true, role: true }
+  })
+
+  if (!user?.organizationId && user?.role !== 'SUPER_ADMIN') {
+    throw createError({
+      statusCode: 403,
+      message: 'No organization associated with your account'
+    })
+  }
+
+  const organizationId = user.organizationId!
 
   const {
     name,
@@ -28,9 +42,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check if email exists
-  const existing = await prisma.client.findUnique({
-    where: { email }
+  // Check if email exists within this organization
+  const existing = await prisma.client.findFirst({
+    where: { email, organizationId }
   })
 
   if (existing) {
@@ -42,6 +56,7 @@ export default defineEventHandler(async (event) => {
 
   const client = await prisma.client.create({
     data: {
+      organizationId,
       name,
       email,
       phone,
@@ -62,5 +77,3 @@ export default defineEventHandler(async (event) => {
 
   return client
 })
-
-

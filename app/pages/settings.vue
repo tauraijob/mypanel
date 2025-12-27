@@ -258,6 +258,242 @@
           </form>
         </div>
       </template>
+
+      <template #backup>
+        <div class="glass-card p-6 mt-4">
+          <h2 class="text-lg font-semibold text-white mb-6">Data Backup & Export</h2>
+          
+          <div class="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-6">
+            <p class="text-sm text-blue-300">
+              <UIcon name="i-lucide-info" class="w-4 h-4 inline mr-1" />
+              Export all your data including clients, services, invoices, and payments. Use JSON for complete backups or CSV for spreadsheet compatibility.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- JSON Export -->
+            <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <UIcon name="i-lucide-file-json" class="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white">JSON Export</h3>
+                  <p class="text-sm text-slate-400">Complete data backup</p>
+                </div>
+              </div>
+              <p class="text-sm text-slate-400 mb-4">
+                Exports all data in JSON format. Best for full backups and data migration.
+              </p>
+              <UButton 
+                color="primary" 
+                icon="i-lucide-download"
+                :loading="exportingJson"
+                @click="exportData('json')"
+              >
+                Download JSON
+              </UButton>
+            </div>
+
+            <!-- CSV Export -->
+            <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <UIcon name="i-lucide-sheet" class="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white">CSV Export</h3>
+                  <p class="text-sm text-slate-400">Spreadsheet compatible</p>
+                </div>
+              </div>
+              <p class="text-sm text-slate-400 mb-4">
+                Exports data in CSV format. Open in Excel, Google Sheets, or any spreadsheet app.
+              </p>
+              <UButton 
+                color="success" 
+                variant="soft"
+                icon="i-lucide-download"
+                :loading="exportingCsv"
+                @click="exportData('csv')"
+              >
+                Download CSV
+              </UButton>
+            </div>
+          </div>
+
+          <!-- Export Summary -->
+          <div class="mt-6 p-4 rounded-lg bg-slate-800/50">
+            <h4 class="text-sm font-medium text-slate-300 mb-3">What's included in the export:</h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                All Clients
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                All Services
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                All Invoices
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                All Payments
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                Categories
+              </div>
+              <div class="flex items-center gap-2 text-slate-400">
+                <UIcon name="i-lucide-check-circle" class="w-4 h-4 text-emerald-400" />
+                Settings
+              </div>
+            </div>
+          </div>
+
+          <!-- Import Section -->
+          <USeparator class="my-8" />
+          
+          <h2 class="text-lg font-semibold text-white mb-6">Data Import</h2>
+          
+          <div class="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-6">
+            <p class="text-sm text-amber-300">
+              <UIcon name="i-lucide-alert-triangle" class="w-4 h-4 inline mr-1" />
+              Import data from a JSON file. Duplicate entries (matching email/name) will be skipped.
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Import Type Selection -->
+            <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <UIcon name="i-lucide-upload" class="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white">Import Data</h3>
+                  <p class="text-sm text-slate-400">Upload JSON file</p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm text-slate-400 mb-2">Data Type</label>
+                  <select v-model="importType" class="form-select w-full">
+                    <option value="clients">Clients</option>
+                    <option value="services">Services</option>
+                    <option value="categories">Categories</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm text-slate-400 mb-2">JSON File</label>
+                  <input 
+                    ref="importFileInput"
+                    type="file" 
+                    accept=".json" 
+                    class="hidden"
+                    @change="handleImportFile"
+                  />
+                  <UButton 
+                    variant="outline"
+                    color="neutral"
+                    icon="i-lucide-file-up"
+                    @click="importFileInput?.click()"
+                    :disabled="importing"
+                  >
+                    Select File
+                  </UButton>
+                </div>
+                
+                <div v-if="importFile" class="p-3 rounded-lg bg-white/5 text-sm">
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-300">{{ importFile.name }}</span>
+                    <UButton 
+                      variant="ghost" 
+                      color="error" 
+                      size="xs" 
+                      icon="i-lucide-x"
+                      @click="clearImportFile"
+                    />
+                  </div>
+                </div>
+                
+                <UButton 
+                  color="primary" 
+                  icon="i-lucide-upload"
+                  :loading="importing"
+                  :disabled="!importFile"
+                  @click="importData"
+                >
+                  Import {{ importType }}
+                </UButton>
+              </div>
+            </div>
+
+            <!-- Import Instructions -->
+            <div class="p-6 rounded-xl bg-white/5 border border-white/10">
+              <h4 class="font-semibold text-white mb-4">JSON Format</h4>
+              <p class="text-sm text-slate-400 mb-4">Your JSON file should be an array of objects:</p>
+              
+              <div v-if="importType === 'clients'" class="text-xs text-slate-400 bg-slate-900/50 p-3 rounded-lg font-mono overflow-x-auto">
+                [<br>
+                &nbsp;&nbsp;{<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"name": "John Doe",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"email": "john@example.com",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"phone": "+123...",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"company": "Company Inc"<br>
+                &nbsp;&nbsp;}<br>
+                ]
+              </div>
+              
+              <div v-else-if="importType === 'services'" class="text-xs text-slate-400 bg-slate-900/50 p-3 rounded-lg font-mono overflow-x-auto">
+                [<br>
+                &nbsp;&nbsp;{<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"name": "Web Hosting",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"clientEmail": "john@example.com",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"price": 10.00,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"billingCycle": "MONTHLY"<br>
+                &nbsp;&nbsp;}<br>
+                ]
+              </div>
+              
+              <div v-else class="text-xs text-slate-400 bg-slate-900/50 p-3 rounded-lg font-mono overflow-x-auto">
+                [<br>
+                &nbsp;&nbsp;{<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"name": "Web Hosting",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"color": "#3b82f6",<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;"icon": "server"<br>
+                &nbsp;&nbsp;}<br>
+                ]
+              </div>
+            </div>
+          </div>
+
+          <!-- Import Results -->
+          <div v-if="importResults" class="mt-6 p-4 rounded-lg" :class="importResults.errors.length ? 'bg-amber-500/10' : 'bg-emerald-500/10'">
+            <h4 class="font-semibold text-white mb-2">Import Results</h4>
+            <div class="grid grid-cols-3 gap-4 text-sm">
+              <div class="text-slate-300">
+                <span class="text-slate-500">Total:</span> {{ importResults.total }}
+              </div>
+              <div class="text-emerald-400">
+                <span class="text-slate-500">Imported:</span> {{ importResults.imported }}
+              </div>
+              <div class="text-amber-400">
+                <span class="text-slate-500">Skipped:</span> {{ importResults.skipped }}
+              </div>
+            </div>
+            <div v-if="importResults.errors.length" class="mt-3 text-sm text-red-300">
+              <p class="font-medium mb-1">Errors:</p>
+              <ul class="list-disc list-inside text-xs">
+                <li v-for="err in importResults.errors.slice(0, 5)" :key="err">{{ err }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </template>
     </UTabs>
   </div>
 </template>
@@ -269,10 +505,12 @@ definePageMeta({
 })
 
 const toast = useToast()
-const { hasPermission, isAdmin } = useAuth()
+const { hasPermission, isAdmin, user } = useAuth()
 
 const saving = ref(false)
 const uploading = ref(false)
+const exportingJson = ref(false)
+const exportingCsv = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const settings = ref({
   companyName: '',
@@ -309,7 +547,8 @@ const tabs = [
   { label: 'Company', slot: 'company', icon: 'i-lucide-building' },
   { label: 'Invoicing', slot: 'invoicing', icon: 'i-lucide-file-text' },
   { label: 'Reminders', slot: 'reminders', icon: 'i-lucide-bell' },
-  { label: 'Email (SMTP)', slot: 'email', icon: 'i-lucide-mail' }
+  { label: 'Email (SMTP)', slot: 'email', icon: 'i-lucide-mail' },
+  { label: 'Backup', slot: 'backup', icon: 'i-lucide-download' }
 ]
 
 const currencyOptions = [
@@ -450,7 +689,138 @@ const removeLogo = async () => {
   }
 }
 
+const exportData = async (format: 'json' | 'csv') => {
+  const isJson = format === 'json'
+  if (isJson) {
+    exportingJson.value = true
+  } else {
+    exportingCsv.value = true
+  }
+  
+  try {
+    const response = await fetch(`/api/export/data?format=${format}`)
+    const blob = await response.blob()
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mypanel-export-${new Date().toISOString().split('T')[0]}.${format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    
+    toast.add({ 
+      title: 'Export successful', 
+      description: `Your ${format.toUpperCase()} backup has been downloaded`,
+      color: 'success' 
+    })
+  } catch (error) {
+    toast.add({ 
+      title: 'Export failed', 
+      description: 'Could not export data. Please try again.',
+      color: 'error' 
+    })
+  } finally {
+    exportingJson.value = false
+    exportingCsv.value = false
+  }
+}
+
+// Import functionality
+const importFileInput = ref<HTMLInputElement | null>(null)
+const importType = ref<'clients' | 'services' | 'categories'>('clients')
+const importFile = ref<File | null>(null)
+const importing = ref(false)
+const importResults = ref<{
+  total: number
+  imported: number
+  skipped: number
+  errors: string[]
+} | null>(null)
+
+const handleImportFile = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    importFile.value = target.files[0]
+    importResults.value = null
+  }
+}
+
+const clearImportFile = () => {
+  importFile.value = null
+  importResults.value = null
+  if (importFileInput.value) {
+    importFileInput.value.value = ''
+  }
+}
+
+const importData = async () => {
+  if (!importFile.value) return
+
+  importing.value = true
+  importResults.value = null
+
+  try {
+    // Read file content
+    const text = await importFile.value.text()
+    let data
+    
+    try {
+      data = JSON.parse(text)
+    } catch {
+      toast.add({
+        title: 'Invalid JSON',
+        description: 'The file does not contain valid JSON data.',
+        color: 'error'
+      })
+      importing.value = false
+      return
+    }
+
+    if (!Array.isArray(data)) {
+      toast.add({
+        title: 'Invalid format',
+        description: 'JSON should be an array of objects.',
+        color: 'error'
+      })
+      importing.value = false
+      return
+    }
+
+    const token = localStorage.getItem('auth_token')
+    const response = await $fetch('/api/data/import', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: {
+        type: importType.value,
+        data,
+        organizationId: user.value?.organizationId
+      }
+    }) as any
+
+    importResults.value = response.results
+    
+    toast.add({
+      title: 'Import complete',
+      description: `Imported ${response.results.imported} of ${response.results.total} ${importType.value}`,
+      color: response.results.errors.length ? 'warning' : 'success'
+    })
+
+    clearImportFile()
+  } catch (error: any) {
+    toast.add({
+      title: 'Import failed',
+      description: error.data?.message || 'Could not import data.',
+      color: 'error'
+    })
+  } finally {
+    importing.value = false
+  }
+}
+
 onMounted(fetchSettings)
 </script>
-
-

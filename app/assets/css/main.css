@@ -287,6 +287,145 @@ body {
 }
 
 /* ============================================
+   NUXT UI DARK MODE FORM OVERRIDES
+   ============================================ */
+
+/* Form Field Labels */
+[data-part="label"],
+label {
+  color: #e2e8f0 !important;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* All Input Types */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea,
+select {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+}
+
+/* Nuxt UI Input Wrappers */
+[data-part="root"] input,
+[data-part="root"] textarea {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Input Container Styling */
+.relative.inline-flex input {
+  width: 100% !important;
+}
+
+/* Select Trigger */
+button[role="combobox"],
+[data-part="trigger"] {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+}
+
+button[role="combobox"]:hover,
+[data-part="trigger"]:hover {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+button[role="combobox"]:focus,
+[data-part="trigger"]:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Form Field Container */
+.space-y-4>div {
+  margin-bottom: 1rem;
+}
+
+/* Text on Form Inputs */
+[data-part="input"] {
+  color: #f1f5f9 !important;
+}
+
+/* Ensure inputs take full width */
+[data-part="root"] {
+  width: 100% !important;
+}
+
+/* Fix for Nuxt UI v4 input styling */
+.relative.inline-flex.items-center {
+  width: 100% !important;
+}
+
+.relative.inline-flex.items-center input {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  width: 100% !important;
+}
+
+/* Form Select Styling */
+.form-select {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background-color: rgba(15, 23, 42, 0.9);
+}
+
+.form-select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* ============================================
    DROPDOWN & SELECT FIX - Z-INDEX
    ============================================ */
 

@@ -81,13 +81,16 @@
     <!-- Filters -->
     <div class="glass-card p-4">
       <div class="flex flex-wrap gap-4 items-center">
-        <UInput
-          v-model="search"
-          placeholder="Search by recipient or subject..."
-          icon="i-lucide-search"
-          class="w-72"
-          @input="debouncedFilter"
-        />
+        <div class="relative w-72">
+          <UIcon name="i-lucide-search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 z-10" />
+          <UInput
+            v-model="search"
+            placeholder="Search by recipient or subject..."
+            class="w-full pl-10"
+            :ui="{ base: 'pl-10' }"
+            @input="debouncedFilter"
+          />
+        </div>
         <div class="flex gap-2 flex-wrap">
           <button
             v-for="type in typeFilters"
