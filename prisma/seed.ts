@@ -6,17 +6,38 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding production database...')
 
-  // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 12)
-  const admin = await prisma.user.upsert({
+  // Create users
+  const password = 'DevTeam24.api.api.'
+  const hashedPassword = await bcrypt.hash('DevTeam24.$.$.', 12)
+
+  // Super Admin
+  const superAdmin = await prisma.user.upsert({
     where: { email: 'taujob1111@gmail.com' },
+    update: {
+      role: 'SUPER_ADMIN',
+      password: hashedPassword,
+      isActive: true
+    },
+    create: {
+      email: 'taujob1111@gmail.com',
+      password: hashedPassword,
+      name: 'Super Admin',
+      role: 'SUPER_ADMIN',
+      isActive: true
+    }
+  })
+  console.log('✅ Super Admin created:', superAdmin.email)
+
+  // Admin
+  const admin = await prisma.user.upsert({
+    where: { email: 'mtauraij@gmail.com' },
     update: {
       role: 'ADMIN',
       password: hashedPassword,
       isActive: true
     },
     create: {
-      email: 'taujob1111@gmail.com',
+      email: 'mtauraij@gmail.com',
       password: hashedPassword,
       name: 'Admin',
       role: 'ADMIN',
@@ -69,10 +90,11 @@ async function main() {
   console.log('🎉 Production database seeded successfully!')
   console.log('')
   console.log('📋 Login credentials:')
-  console.log('   Email: taujob1111@gmail.com')
-  console.log('   Password: admin123')
+  console.log('   Super Admin: taujob1111@gmail.com')
+  console.log('   Admin: mtauraij@gmail.com')
+  console.log('   Password: DevTeam24.$.$.')
   console.log('')
-  console.log('⚠️  IMPORTANT: Change the admin password after first login!')
+  console.log('⚠️  IMPORTANT: Change the passwords after first login!')
 }
 
 main()
