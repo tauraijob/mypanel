@@ -59,16 +59,30 @@
             <p v-else class="text-xs text-slate-500 mt-2">Billed monthly</p>
           </div>
 
-          <NuxtLink :to="`/signup?plan=${plan.id}`" class="mb-8">
-            <UButton 
-              block 
-              :color="plan.isPopular ? 'primary' : 'neutral'"
-              variant="solid" 
-              size="lg"
-            >
-              Start Free Trial
-            </UButton>
-          </NuxtLink>
+          <div class="mb-8">
+            <!-- Logged-in users go to billing -->
+            <NuxtLink v-if="isLoggedIn" to="/billing">
+              <UButton 
+                block 
+                :color="plan.isPopular ? 'primary' : 'neutral'"
+                variant="solid" 
+                size="lg"
+              >
+                View Upgrade Options
+              </UButton>
+            </NuxtLink>
+            <!-- Guests go to signup -->
+            <NuxtLink v-else :to="`/signup?plan=${plan.id}`">
+              <UButton 
+                block 
+                :color="plan.isPopular ? 'primary' : 'neutral'"
+                variant="solid" 
+                size="lg"
+              >
+                Start Free Trial
+              </UButton>
+            </NuxtLink>
+          </div>
 
           <div class="space-y-4 flex-1">
             <p class="text-sm font-semibold text-white">What's included:</p>
@@ -114,6 +128,9 @@
 definePageMeta({
   layout: 'public'
 })
+
+const { user } = useAuth()
+const isLoggedIn = computed(() => !!user.value)
 
 const billingCycle = ref<'monthly' | 'yearly'>('monthly')
 
