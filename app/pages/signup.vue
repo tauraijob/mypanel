@@ -10,9 +10,7 @@
       <!-- Logo & Title -->
       <div class="text-center mb-8">
         <NuxtLink to="/" class="inline-flex items-center gap-3 mb-4">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-            <UIcon name="i-lucide-layout-dashboard" class="w-7 h-7 text-white" />
-          </div>
+          <img src="/icon.png" alt="MyPanel" class="w-12 h-12 rounded-xl" />
           <span class="text-2xl font-bold text-white">MyPanel</span>
         </NuxtLink>
         <h1 class="text-3xl font-bold text-white">Start Your Free Trial</h1>

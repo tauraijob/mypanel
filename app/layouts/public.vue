@@ -5,9 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <NuxtLink to="/" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-              <UIcon name="i-lucide-layout-dashboard" class="w-6 h-6 text-white" />
-            </div>
+            <img src="/icon.png" alt="MyPanel" class="w-10 h-10 rounded-xl" />
             <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">MyPanel</span>
           </NuxtLink>
           
@@ -38,9 +36,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center gap-3 mb-6">
-              <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                <UIcon name="i-lucide-layout-dashboard" class="w-4 h-4 text-white" />
-              </div>
+              <img src="/icon.png" alt="MyPanel" class="w-8 h-8 rounded-lg" />
               <span class="font-bold text-white text-lg">MyPanel</span>
             </div>
             <p class="text-slate-400 max-w-sm mb-6">

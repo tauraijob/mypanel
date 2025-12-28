@@ -3,9 +3,7 @@
     <!-- Mobile Header -->
     <header class="lg:hidden glass-card m-2 mb-0 p-4 flex items-center justify-between sticky top-0 z-40">
       <NuxtLink to="/dashboard" class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-          <UIcon name="i-lucide-layout-dashboard" class="w-4 h-4 text-white" />
-        </div>
+        <img src="/icon.png" alt="MyPanel" class="w-8 h-8 rounded-lg" />
         <span class="text-lg font-bold gradient-text">MyPanel</span>
       </NuxtLink>
       <UButton
@@ -40,9 +38,7 @@
       <!-- Logo (hidden on mobile, shown in header) -->
       <div class="hidden lg:block p-4 border-b border-white/10">
         <NuxtLink to="/dashboard" class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-            <UIcon name="i-lucide-layout-dashboard" class="w-6 h-6 text-white" />
-          </div>
+          <img src="/icon.png" alt="MyPanel" class="w-10 h-10 rounded-xl" />
           <span class="text-xl font-bold gradient-text">MyPanel</span>
         </NuxtLink>
       </div>

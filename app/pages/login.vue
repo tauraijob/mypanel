@@ -11,9 +11,7 @@
         <!-- Logo -->
         <div class="text-center mb-8">
           <NuxtLink to="/" class="inline-block">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4">
-              <UIcon name="i-lucide-layout-dashboard" class="w-8 h-8 text-white" />
-            </div>
+            <img src="/icon.png" alt="MyPanel" class="w-16 h-16 rounded-2xl mx-auto mb-4" />
           </NuxtLink>
           <h1 class="text-2xl font-bold text-white">Welcome to MyPanel</h1>
           <p class="text-slate-400 mt-2">Sign in to manage your clients & services</p>
