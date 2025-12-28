@@ -2,7 +2,32 @@
 import { addMonths, addDays, addYears } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
+  const authUser = await requireAuth(event)
   const body = await readBody(event)
+
+  // Get user's organization
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { organizationId: true }
+  })
+
+  if (!user?.organizationId) {
+    throw createError({
+      statusCode: 403,
+      message: 'No organization associated with your account'
+    })
+  }
+
+  const organizationId = user.organizationId
+
+  // Check plan limits
+  const limitCheck = await canAddService(organizationId)
+  if (!limitCheck.allowed) {
+    throw createError({
+      statusCode: 403,
+      message: limitCheck.message || 'Service limit reached for your plan'
+    })
+  }
 
   const {
     name,

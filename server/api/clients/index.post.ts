@@ -17,6 +17,15 @@ export default defineEventHandler(async (event) => {
 
   const organizationId = user.organizationId!
 
+  // Check plan limits
+  const limitCheck = await canAddClient(organizationId)
+  if (!limitCheck.allowed) {
+    throw createError({
+      statusCode: 403,
+      message: limitCheck.message || 'Client limit reached for your plan'
+    })
+  }
+
   const {
     name,
     email,

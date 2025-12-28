@@ -39,11 +39,19 @@
           <div
             v-for="plan in plans"
             :key="plan.id"
-            class="glass-card p-6 cursor-pointer transition-all hover:scale-105"
-            :class="selectedPlanId === plan.id ? 'ring-2 ring-blue-500' : ''"
+            class="glass-card p-6 cursor-pointer transition-all hover:scale-105 relative"
+            :class="[
+              selectedPlanId === plan.id ? 'ring-2 ring-blue-500' : '',
+              plan.isPopular ? 'border-blue-500/50' : ''
+            ]"
             @click="selectedPlanId = plan.id"
           >
-            <h3 class="text-xl font-bold text-white mb-2">{{ plan.name }}</h3>
+            <!-- Most Popular Badge -->
+            <div v-if="plan.isPopular" class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-bold uppercase tracking-wider">
+              Most Popular
+            </div>
+
+            <h3 class="text-xl font-bold text-white mb-2" :class="{ 'mt-2': plan.isPopular }">{{ plan.name }}</h3>
             <p class="text-slate-400 text-sm mb-4 h-12">{{ plan.description }}</p>
             
             <div class="mb-4">

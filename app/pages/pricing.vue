@@ -43,9 +43,9 @@
           v-for="plan in plans" 
           :key="plan.id"
           class="glass-card p-8 flex flex-col relative group transition-all duration-300 hover:-translate-y-2 hover:bg-slate-900/40"
-          :class="{ 'border-blue-500/50 ring-1 ring-blue-500/50': plan.name === 'Professional' }"
+          :class="{ 'border-blue-500/50 ring-1 ring-blue-500/50': plan.isPopular }"
         >
-          <div v-if="plan.name === 'Professional'" class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-blue-500 text-white text-xs font-bold uppercase tracking-wider">
+          <div v-if="plan.isPopular" class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-blue-500 text-white text-xs font-bold uppercase tracking-wider">
             Most Popular
           </div>
 
@@ -62,7 +62,7 @@
           <NuxtLink :to="`/signup?plan=${plan.id}`" class="mb-8">
             <UButton 
               block 
-              :color="plan.name === 'Professional' ? 'primary' : 'neutral'"
+              :color="plan.isPopular ? 'primary' : 'neutral'"
               variant="solid" 
               size="lg"
             >

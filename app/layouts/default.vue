@@ -30,8 +30,10 @@
     <aside
       :class="[
         'fixed lg:relative inset-y-0 left-0 z-50',
-        'w-64 glass-card lg:m-3 lg:mr-0 flex flex-col',
+        'w-64 flex flex-col',
         'transform transition-transform duration-300 ease-in-out',
+        'bg-slate-900 lg:bg-transparent lg:glass-card lg:m-3 lg:mr-0',
+        'border-r border-white/10 lg:border',
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
     >
