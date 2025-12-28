@@ -110,6 +110,68 @@
       </div>
     </div>
 
+    <!-- Pending Payment Status -->
+    <div v-if="pendingPayment" class="glass-card p-6 border-l-4 border-l-blue-500 bg-blue-500/5">
+      <div class="flex items-center gap-4">
+        <UIcon name="i-lucide-loader-2" class="w-6 h-6 text-blue-400 animate-spin shrink-0" />
+        <div class="flex-1">
+          <h4 class="font-semibold text-white mb-1">Payment Processing</h4>
+          <p class="text-slate-400 text-sm">{{ paymentStatus }}</p>
+        </div>
+        <UButton 
+          v-if="paymentCompleted"
+          color="primary"
+          @click="refreshData"
+        >
+          Refresh Status
+        </UButton>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div>
+      <h2 class="text-xl font-bold text-white mb-4">Payment History</h2>
+      
+      <div v-if="payments?.length" class="glass-card overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-slate-800/50">
+            <tr>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase px-4 py-3">Date</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase px-4 py-3">Description</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase px-4 py-3">Amount</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            <tr v-for="payment in payments" :key="payment.id" class="hover:bg-white/5">
+              <td class="px-4 py-3 text-sm text-slate-300">
+                {{ new Date(payment.createdAt).toLocaleDateString() }}
+              </td>
+              <td class="px-4 py-3 text-sm text-white">
+                {{ payment.planName }} Subscription
+              </td>
+              <td class="px-4 py-3 text-sm text-white font-medium">
+                ${{ payment.amount.toFixed(2) }}
+              </td>
+              <td class="px-4 py-3">
+                <UBadge 
+                  :color="payment.status === 'COMPLETED' ? 'success' : payment.status === 'FAILED' ? 'error' : 'warning'"
+                  size="sm"
+                >
+                  {{ payment.status }}
+                </UBadge>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div v-else class="glass-card p-8 text-center">
+        <UIcon name="i-lucide-receipt" class="w-10 h-10 text-slate-600 mx-auto mb-3" />
+        <p class="text-slate-400">No payment history yet.</p>
+      </div>
+    </div>
+
     <!-- Payment Info -->
     <div class="glass-card p-6 border-l-4 border-l-amber-500 bg-amber-500/5">
       <div class="flex items-start gap-4">
@@ -117,9 +179,8 @@
         <div>
           <h4 class="font-semibold text-white mb-2">Payment Information</h4>
           <p class="text-slate-400 text-sm">
-            After completing payment, your subscription will be activated within 24 hours. 
-            For Paynow payments, please use your organization email as the reference.
-            Contact support if your subscription isn't activated after payment.
+            After completing payment, your subscription will be activated automatically.
+            If your subscription isn't activated within a few minutes, try refreshing the page or contact support.
           </p>
         </div>
       </div>
@@ -135,11 +196,97 @@ definePageMeta({
 
 const runtimeConfig = useRuntimeConfig()
 const baseUrl = runtimeConfig.public.appUrl || 'http://localhost:3000'
+const route = useRoute()
+const toast = useToast()
 
 // Use refs for client-side data fetching (token is in localStorage)
 const status = ref<any>(null)
 const config = ref<any>(null)
+const payments = ref<any[]>([])
 const loading = ref(true)
+
+// Pending payment tracking
+const pendingPayment = ref(false)
+const paymentStatus = ref('Checking payment status...')
+const paymentCompleted = ref(false)
+let pollInterval: NodeJS.Timeout | null = null
+
+const fetchData = async () => {
+  const token = localStorage.getItem('auth_token')
+  if (!token) return
+
+  const headers = { Authorization: `Bearer ${token}` }
+
+  try {
+    const [statusData, configData, paymentsData] = await Promise.all([
+      $fetch('/api/billing/status', { headers }),
+      $fetch('/api/billing/config', { headers }),
+      $fetch('/api/billing/payments', { headers })
+    ])
+    status.value = statusData
+    config.value = configData
+    payments.value = paymentsData as any[]
+  } catch (error) {
+    console.error('Failed to fetch billing data:', error)
+  }
+}
+
+const refreshData = async () => {
+  loading.value = true
+  pendingPayment.value = false
+  paymentCompleted.value = false
+  await fetchData()
+  loading.value = false
+}
+
+// Poll for payment status
+const pollPaymentStatus = async () => {
+  const token = localStorage.getItem('auth_token')
+  if (!token) return
+
+  // Find the most recent pending payment
+  const pendingPaymentRecord = payments.value.find(p => p.status === 'PENDING')
+  if (!pendingPaymentRecord) {
+    pendingPayment.value = false
+    return
+  }
+
+  try {
+    const result = await $fetch(`/api/billing/check-payment?paymentId=${pendingPaymentRecord.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }) as { status: string; message: string }
+
+    paymentStatus.value = result.message
+
+    if (result.status === 'COMPLETED') {
+      paymentCompleted.value = true
+      pendingPayment.value = false
+      if (pollInterval) {
+        clearInterval(pollInterval)
+        pollInterval = null
+      }
+      toast.add({
+        title: 'Payment Successful!',
+        description: 'Your subscription is now active.',
+        color: 'success'
+      })
+      await fetchData()
+    } else if (result.status === 'FAILED') {
+      pendingPayment.value = false
+      if (pollInterval) {
+        clearInterval(pollInterval)
+        pollInterval = null
+      }
+      toast.add({
+        title: 'Payment Failed',
+        description: 'Please try again.',
+        color: 'error'
+      })
+    }
+  } catch (error) {
+    console.error('Failed to check payment:', error)
+  }
+}
 
 // Fetch billing data on client-side with auth headers
 onMounted(async () => {
@@ -148,20 +295,22 @@ onMounted(async () => {
     loading.value = false
     return
   }
-  
-  const headers = { Authorization: `Bearer ${token}` }
-  
-  try {
-    const [statusData, configData] = await Promise.all([
-      $fetch('/api/billing/status', { headers }),
-      $fetch('/api/billing/config', { headers })
-    ])
-    status.value = statusData
-    config.value = configData
-  } catch (error) {
-    console.error('Failed to fetch billing data:', error)
-  } finally {
-    loading.value = false
+
+  await fetchData()
+  loading.value = false
+
+  // Check if returning from payment
+  if (route.query.payment === 'pending') {
+    pendingPayment.value = true
+    // Start polling for payment status
+    pollPaymentStatus()
+    pollInterval = setInterval(pollPaymentStatus, 5000) // Poll every 5 seconds
+  }
+})
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval)
   }
 })
 

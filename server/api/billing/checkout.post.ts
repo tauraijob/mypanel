@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
         if (response.success) {
             // Store payment reference for callback handling
-            await prisma.organizationPayment.create({
+            const newPayment = await prisma.organizationPayment.create({
                 data: {
                     organizationId: organization.id,
                     amount,
@@ -87,7 +87,8 @@ export default defineEventHandler(async (event) => {
             return {
                 success: true,
                 redirectUrl: response.redirectUrl,
-                pollUrl: response.pollUrl
+                pollUrl: response.pollUrl,
+                paymentId: newPayment.id
             }
         } else {
             throw createError({
