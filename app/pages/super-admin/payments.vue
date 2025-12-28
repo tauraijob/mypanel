@@ -115,7 +115,12 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
-              <tr v-for="payment in filteredPayments" :key="payment.id" class="hover:bg-white/5">
+              <tr 
+                v-for="payment in filteredPayments" 
+                :key="payment.id" 
+                class="hover:bg-white/5 cursor-pointer transition-colors"
+                @click="openPaymentDetails(payment)"
+              >
                 <td class="px-4 py-3 text-sm text-slate-300">
                   {{ formatDate(payment.createdAt) }}
                 </td>
@@ -133,7 +138,7 @@
                 </td>
                 <td class="px-4 py-3 text-sm text-slate-300">
                   <UBadge color="neutral" variant="subtle" size="sm">
-                    {{ payment.paymentMethod }}
+                    {{ formatPaymentMethod(payment.paymentMethod) }}
                   </UBadge>
                 </td>
                 <td class="px-4 py-3 text-xs text-slate-400">
@@ -151,22 +156,128 @@
                   </UBadge>
                 </td>
                 <td class="px-4 py-3">
-                  <NuxtLink :to="`/super-admin/organizations/${payment.organizationId}`">
-                    <UButton 
-                      color="neutral" 
-                      variant="ghost" 
-                      size="xs"
-                      icon="i-lucide-external-link"
-                    >
-                      View Org
-                    </UButton>
-                  </NuxtLink>
+                  <UIcon name="i-lucide-chevron-right" class="w-4 h-4 text-slate-500" />
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Payment Details Modal -->
+      <UModal v-model:open="showPaymentModal">
+        <template #content>
+          <div class="p-6 bg-slate-900 max-w-lg">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold text-white">Payment Details</h3>
+              <UButton 
+                icon="i-lucide-x" 
+                color="neutral" 
+                variant="ghost" 
+                size="sm"
+                @click="showPaymentModal = false"
+              />
+            </div>
+            
+            <template v-if="selectedPayment">
+              <!-- Status Banner -->
+              <div 
+                class="p-4 rounded-lg mb-6"
+                :class="{
+                  'bg-emerald-500/10 border border-emerald-500/30': selectedPayment.status === 'COMPLETED',
+                  'bg-amber-500/10 border border-amber-500/30': selectedPayment.status === 'PENDING',
+                  'bg-red-500/10 border border-red-500/30': selectedPayment.status === 'FAILED'
+                }"
+              >
+                <div class="flex items-center gap-3">
+                  <UIcon 
+                    :name="selectedPayment.status === 'COMPLETED' ? 'i-lucide-check-circle' : selectedPayment.status === 'PENDING' ? 'i-lucide-clock' : 'i-lucide-x-circle'"
+                    class="w-6 h-6"
+                    :class="{
+                      'text-emerald-400': selectedPayment.status === 'COMPLETED',
+                      'text-amber-400': selectedPayment.status === 'PENDING',
+                      'text-red-400': selectedPayment.status === 'FAILED'
+                    }"
+                  />
+                  <div>
+                    <p class="font-semibold" :class="{
+                      'text-emerald-400': selectedPayment.status === 'COMPLETED',
+                      'text-amber-400': selectedPayment.status === 'PENDING',
+                      'text-red-400': selectedPayment.status === 'FAILED'
+                    }">
+                      {{ selectedPayment.status === 'COMPLETED' ? 'Payment Successful' : selectedPayment.status === 'PENDING' ? 'Payment Pending' : 'Payment Failed' }}
+                    </p>
+                    <p class="text-sm text-slate-400">{{ formatDateTime(selectedPayment.createdAt) }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Amount -->
+              <div class="text-center mb-6">
+                <p class="text-sm text-slate-400 mb-1">Amount</p>
+                <p class="text-4xl font-bold text-white">${{ selectedPayment.amount.toFixed(2) }}</p>
+                <p class="text-slate-500">{{ selectedPayment.currency }}</p>
+              </div>
+              
+              <!-- Details Grid -->
+              <div class="space-y-4">
+                <div class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Organization</span>
+                  <div class="text-right">
+                    <span class="text-white font-medium block">{{ selectedPayment.organizationName }}</span>
+                    <span class="text-xs text-slate-500">{{ selectedPayment.organizationEmail }}</span>
+                  </div>
+                </div>
+                
+                <div class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Plan</span>
+                  <span class="text-white font-medium">{{ selectedPayment.planName }}</span>
+                </div>
+                
+                <div class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Payment Method</span>
+                  <span class="text-white font-medium">{{ formatPaymentMethod(selectedPayment.paymentMethod) }}</span>
+                </div>
+                
+                <div v-if="selectedPayment.transactionId" class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Transaction Ref</span>
+                  <span class="text-white font-mono text-sm">{{ selectedPayment.transactionId.slice(0, 25) }}{{ selectedPayment.transactionId.length > 25 ? '...' : '' }}</span>
+                </div>
+                
+                <div class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Payment Date</span>
+                  <span class="text-white">{{ formatDateTime(selectedPayment.createdAt) }}</span>
+                </div>
+                
+                <div v-if="selectedPayment.periodStart && selectedPayment.periodEnd" class="flex justify-between py-3 border-b border-white/10">
+                  <span class="text-slate-400">Subscription Period</span>
+                  <span class="text-white">{{ formatDate(selectedPayment.periodStart) }} - {{ formatDate(selectedPayment.periodEnd) }}</span>
+                </div>
+                
+                <div class="flex justify-between py-3">
+                  <span class="text-slate-400">Payment ID</span>
+                  <span class="text-slate-500 font-mono text-sm">#{{ selectedPayment.id }}</span>
+                </div>
+              </div>
+              
+              <!-- View Organization Button -->
+              <div class="mt-6 pt-4 border-t border-white/10">
+                <NuxtLink :to="`/super-admin/organizations/${selectedPayment.organizationId}`">
+                  <UButton 
+                    block 
+                    color="primary" 
+                    variant="soft"
+                    icon="i-lucide-building-2"
+                    @click="showPaymentModal = false"
+                  >
+                    View Organization
+                  </UButton>
+                </NuxtLink>
+              </div>
+            </template>
+          </div>
+        </template>
+      </UModal>
     </template>
   </div>
 </template>
@@ -325,6 +436,38 @@ const getStatusColor = (status: string) => {
     case 'FAILED': return 'error'
     default: return 'neutral'
   }
+}
+
+// Payment details modal
+const showPaymentModal = ref(false)
+const selectedPayment = ref<any>(null)
+
+const openPaymentDetails = (payment: any) => {
+  selectedPayment.value = payment
+  showPaymentModal.value = true
+}
+
+const formatDateTime = (date: string | Date) => {
+  return new Date(date).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const formatPaymentMethod = (method: string) => {
+  const methods: Record<string, string> = {
+    'PAYNOW': 'Paynow',
+    'ECOCASH': 'EcoCash',
+    'ONEMONEY': 'OneMoney',
+    'INNBUCKS': 'InnBucks',
+    'BANK': 'Bank Transfer',
+    'CARD': 'Credit/Debit Card'
+  }
+  return methods[method] || method
 }
 
 onMounted(() => {
