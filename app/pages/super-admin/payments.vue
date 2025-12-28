@@ -167,7 +167,7 @@
       <!-- Payment Details Modal -->
       <UModal v-model:open="showPaymentModal">
         <template #content>
-          <div class="p-6 bg-slate-900 max-w-lg">
+          <div class="p-6 pb-8 bg-slate-900 min-w-[400px] max-w-lg">
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-xl font-bold text-white">Payment Details</h3>
               <UButton 
@@ -329,11 +329,6 @@ const fetchPayments = async () => {
     console.log('Payments response:', data)
     payments.value = data.payments || []
     stats.value = data.stats || { totalRevenue: 0, completedCount: 0, pendingCount: 0 }
-    
-    // Render chart after data loads
-    nextTick(() => {
-      renderChart()
-    })
   } catch (error: any) {
     console.error('Failed to fetch payments:', error)
     const toast = useToast()
@@ -382,7 +377,11 @@ const chartData = computed(() => {
 })
 
 const renderChart = () => {
-  if (!chartCanvas.value || !chartData.value.labels.length) return
+  if (!chartCanvas.value) return
+  if (!chartData.value.labels.length) {
+    console.log('No chart data available')
+    return
+  }
 
   if (chartInstance) {
     chartInstance.destroy()
@@ -482,6 +481,16 @@ const formatPaymentMethod = (method: string) => {
 onMounted(() => {
   fetchPayments()
 })
+
+// Watch for chart data changes and render chart
+watch(chartData, (newData) => {
+  if (newData.labels.length > 0) {
+    // Wait for DOM to update with the canvas
+    setTimeout(() => {
+      renderChart()
+    }, 100)
+  }
+}, { deep: true })
 
 onUnmounted(() => {
   if (chartInstance) {

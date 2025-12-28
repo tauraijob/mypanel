@@ -67,11 +67,14 @@
               </td>
               <td class="p-4">
                 <div class="flex items-center gap-2">
-                  <button class="p-2 rounded hover:bg-white/10 text-slate-400 hover:text-white" @click="editOrg(org.id)">
+                  <button class="p-2 rounded hover:bg-white/10 text-slate-400 hover:text-white" @click="editOrg(org.id)" title="Edit">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                   </button>
-                  <button class="p-2 rounded hover:bg-white/10 text-slate-400 hover:text-white" @click="viewOrg(org.id)">
+                  <button class="p-2 rounded hover:bg-white/10 text-slate-400 hover:text-white" @click="viewOrg(org.id)" title="View">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button class="p-2 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400" @click="confirmDelete(org)" title="Delete">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                   </button>
                 </div>
               </td>
@@ -82,7 +85,49 @@
       </div>
     </NuxtLayout>
 
-    <!-- Modal -->
+    <!-- Delete Confirmation Modal -->
+    <div v-show="showDeleteModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/70" @click="cancelDelete" />
+      <div class="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Delete Organization?</h3>
+          <p class="text-slate-400">
+            Are you sure you want to delete <span class="text-white font-medium">{{ orgToDelete?.name }}</span>?
+          </p>
+          <p class="text-red-400 text-sm mt-2">
+            This will permanently delete all data including users, clients, services, invoices, and payments.
+          </p>
+        </div>
+        
+        <div class="flex gap-3">
+          <button 
+            class="flex-1 px-4 py-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5"
+            @click="cancelDelete"
+            :disabled="deleting"
+          >
+            Cancel
+          </button>
+          <button 
+            class="flex-1 px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium flex items-center justify-center gap-2"
+            @click="deleteOrg"
+            :disabled="deleting"
+          >
+            <svg v-if="deleting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ deleting ? 'Deleting...' : 'Delete Organization' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit/Create Modal -->
     <div v-show="showModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/70" @click="closeModal" />
       <div class="relative bg-slate-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-auto">
@@ -309,6 +354,52 @@ const submitForm = async () => {
 
 const viewOrg = (id: number) => {
   navigateTo(`/super-admin/organizations/${id}`)
+}
+
+// Delete confirmation
+const showDeleteModal = ref(false)
+const orgToDelete = ref<any>(null)
+const deleting = ref(false)
+
+const confirmDelete = (org: any) => {
+  orgToDelete.value = org
+  showDeleteModal.value = true
+}
+
+const cancelDelete = () => {
+  showDeleteModal.value = false
+  orgToDelete.value = null
+}
+
+const deleteOrg = async () => {
+  if (!orgToDelete.value) return
+  
+  deleting.value = true
+  const token = localStorage.getItem('auth_token')
+  
+  try {
+    await $fetch(`/api/super-admin/organizations/${orgToDelete.value.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    showDeleteModal.value = false
+    orgToDelete.value = null
+    await fetchData()
+    toast.add({ 
+      title: 'Organization deleted', 
+      description: 'The organization and all its data have been permanently removed.',
+      color: 'success' 
+    })
+  } catch (error: any) {
+    toast.add({ 
+      title: 'Delete failed', 
+      description: error.data?.message || 'Failed to delete organization', 
+      color: 'error' 
+    })
+  } finally {
+    deleting.value = false
+  }
 }
 
 onMounted(fetchData)
