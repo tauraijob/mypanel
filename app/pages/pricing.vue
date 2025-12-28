@@ -73,30 +73,6 @@
           <div class="space-y-4 flex-1">
             <p class="text-sm font-semibold text-white">What's included:</p>
             <div class="space-y-3">
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>{{ plan.maxClients === -1 ? 'Unlimited' : plan.maxClients }} Clients</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>{{ plan.maxUsers === -1 ? 'Unlimited' : plan.maxUsers }} Team Members</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>{{ plan.maxServices === -1 ? 'Unlimited' : plan.maxServices }} Services</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>Unlimited Invoices</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>Payment Recording</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-slate-400">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>Automated Email Reminders</span>
-              </div>
               <div v-for="feature in (plan.features || '').split(',')" :key="feature" class="flex items-center gap-3 text-sm text-slate-400">
                 <template v-if="feature.trim()">
                   <UIcon name="i-lucide-check" class="w-5 h-5 text-emerald-500 shrink-0" />
