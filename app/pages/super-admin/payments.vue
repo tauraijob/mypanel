@@ -315,15 +315,18 @@ const fetchPayments = async () => {
   const token = localStorage.getItem('auth_token')
   
   if (!token) {
+    console.log('No auth token found')
     loading.value = false
     return
   }
 
   try {
+    console.log('Fetching super admin payments...')
     const data = await $fetch('/api/super-admin/payments', {
       headers: { Authorization: `Bearer ${token}` }
     }) as any
 
+    console.log('Payments response:', data)
     payments.value = data.payments || []
     stats.value = data.stats || { totalRevenue: 0, completedCount: 0, pendingCount: 0 }
     
@@ -331,8 +334,14 @@ const fetchPayments = async () => {
     nextTick(() => {
       renderChart()
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch payments:', error)
+    const toast = useToast()
+    toast.add({
+      title: 'Error loading payments',
+      description: error?.data?.message || error?.message || 'Unknown error',
+      color: 'error'
+    })
   } finally {
     loading.value = false
   }
