@@ -39,6 +39,12 @@ export default defineEventHandler(async (event) => {
             }
         })
 
+        // Get organization and plan details
+        const organization = await prisma.organization.findUnique({
+            where: { id: payment.organizationId },
+            include: { plan: true }
+        })
+
         // Activate the subscription
         await prisma.organization.update({
             where: { id: payment.organizationId },
@@ -48,6 +54,21 @@ export default defineEventHandler(async (event) => {
                 subscriptionEnd: payment.periodEnd
             }
         })
+
+        // Notify super admin about the payment
+        if (organization) {
+            notifySuperAdminPayment({
+                organizationId: organization.id,
+                organizationName: organization.name,
+                organizationEmail: organization.email,
+                amount: Number(payment.amount),
+                currency: payment.currency,
+                planName: organization.plan?.name || 'Subscription',
+                periodStart: payment.periodStart,
+                periodEnd: payment.periodEnd,
+                paymentMethod: payment.paymentMethod
+            })
+        }
 
         console.log(`Subscription activated for org ${payment.organizationId}`)
 

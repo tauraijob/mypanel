@@ -126,6 +126,7 @@ const navItems = [
   { label: 'Organizations', to: '/super-admin/organizations', icon: 'i-lucide-building-2' },
   { label: 'Users', to: '/super-admin/users', icon: 'i-lucide-users' },
   { label: 'Plans', to: '/super-admin/plans', icon: 'i-lucide-credit-card' },
+  { label: 'Payments', to: '/super-admin/payments', icon: 'i-lucide-receipt' },
   { label: 'Email Logs', to: '/super-admin/email-logs', icon: 'i-lucide-mail' },
   { label: 'Settings', to: '/super-admin/settings', icon: 'i-lucide-settings' }
 ]
