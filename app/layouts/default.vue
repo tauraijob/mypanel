@@ -38,7 +38,7 @@
       ]"
     >
       <!-- Logo (hidden on mobile, shown in header) -->
-      <div class="hidden lg:block p-6 border-b border-white/10">
+      <div class="hidden lg:block p-4 border-b border-white/10">
         <NuxtLink to="/dashboard" class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
             <UIcon name="i-lucide-layout-dashboard" class="w-6 h-6 text-white" />
@@ -60,10 +60,10 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
         <!-- Loading skeleton -->
         <template v-if="loading">
-          <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-4 py-3">
+          <div v-for="i in 6" :key="i" class="flex items-center gap-3 px-3 py-2">
             <div class="w-5 h-5 rounded bg-white/10 animate-pulse"></div>
             <div class="h-4 w-24 rounded bg-white/10 animate-pulse"></div>
           </div>
@@ -75,7 +75,7 @@
             <NuxtLink
               v-if="canAccessRoute(item.permission)"
               :to="item.to"
-              class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:text-white transition-colors"
+              class="sidebar-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:text-white transition-colors text-sm"
               active-class="active text-white"
               @click="isSidebarOpen = false"
             >

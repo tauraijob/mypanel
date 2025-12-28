@@ -1,7 +1,7 @@
 <template>
   <div class="relative overflow-hidden">
     <!-- Hero Section -->
-    <section class="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8">
+    <section class="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8">
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div class="absolute top-60 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
@@ -13,95 +13,75 @@
           <span class="text-sm font-medium text-blue-300">Smart Business Management</span>
         </div>
         
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-8 leading-tight tracking-tight">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">
           Track Clients, Services &<br />
           <span class="gradient-text">Invoicing — All in One Place</span>
         </h1>
         
-        <p class="text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+        <p class="text-base text-slate-400 max-w-3xl mx-auto mb-10 leading-relaxed">
           MyPanel is a simple, powerful tool for <strong class="text-white">web hosts, freelancers, and service providers</strong> to manage clients, 
           track recurring services, send professional invoices, and record payments — so you stay organized and get paid on time.
         </p>
 
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-20">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
           <NuxtLink to="/signup">
-            <UButton color="primary" size="xl" icon="i-lucide-rocket" class="px-8 shadow-xl shadow-blue-500/20">
+            <UButton color="primary" size="lg" icon="i-lucide-rocket" class="px-6 shadow-lg shadow-blue-500/20">
               Start Your 14-Day Free Trial
             </UButton>
           </NuxtLink>
           <NuxtLink to="/pricing">
-            <UButton variant="ghost" size="xl" icon="i-lucide-credit-card" class="text-slate-300">
+            <UButton variant="ghost" size="lg" icon="i-lucide-credit-card" class="text-slate-300">
               View Pricing Plans
             </UButton>
           </NuxtLink>
-        </div>
-
-        <!-- Benefits Summary -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-          <div class="glass-card p-6 text-center">
-            <p class="text-3xl font-bold text-blue-400">Unlimited</p>
-            <p class="text-sm text-slate-400 mt-1">Clients & Invoices</p>
-          </div>
-          <div class="glass-card p-6 text-center">
-            <p class="text-3xl font-bold text-emerald-400">Automated</p>
-            <p class="text-sm text-slate-400 mt-1">Email Reminders</p>
-          </div>
-          <div class="glass-card p-6 text-center">
-            <p class="text-3xl font-bold text-amber-400">Branded</p>
-            <p class="text-sm text-slate-400 mt-1">PDF Invoices</p>
-          </div>
-          <div class="glass-card p-6 text-center">
-            <p class="text-3xl font-bold text-purple-400">Track</p>
-            <p class="text-sm text-slate-400 mt-1">Due Dates & Payments</p>
-          </div>
         </div>
       </div>
     </section>
 
     <!-- How It Works Summary -->
-    <section class="py-20 border-y border-white/5 bg-slate-900/30">
+    <section class="py-12 border-y border-white/5 bg-slate-900/30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-white mb-4">Get Started in 3 Simple Steps</h2>
-          <p class="text-slate-400 max-w-2xl mx-auto">No technical knowledge required. Sign up, set up your business, and start managing clients in minutes.</p>
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-white mb-3">Get Started in 3 Simple Steps</h2>
+          <p class="text-slate-400 max-w-2xl mx-auto text-sm">No technical knowledge required. Sign up, set up your business, and start managing clients in minutes.</p>
         </div>
-        <div class="grid md:grid-cols-3 gap-12">
+        <div class="grid md:grid-cols-3 gap-8">
           <div class="text-center">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white">1</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Choose Your Plan</h3>
-            <p class="text-slate-400">Pick a subscription that fits your needs. Start with a 14-day free trial — no credit card required.</p>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 text-lg font-bold text-white">1</div>
+            <h3 class="text-base font-semibold text-white mb-2">Choose Your Plan</h3>
+            <p class="text-slate-400 text-sm">Pick a subscription that fits your needs. Start with a 14-day free trial — no credit card required.</p>
           </div>
           <div class="text-center">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white">2</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Set Up Your Business</h3>
-            <p class="text-slate-400">Add your company details, branding, and configure your invoicing preferences.</p>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-4 text-lg font-bold text-white">2</div>
+            <h3 class="text-base font-semibold text-white mb-2">Set Up Your Business</h3>
+            <p class="text-slate-400 text-sm">Add your company details, branding, and configure your invoicing preferences.</p>
           </div>
           <div class="text-center">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold text-white">3</div>
-            <h3 class="text-xl font-semibold text-white mb-3">Start Tracking Everything</h3>
-            <p class="text-slate-400">Add clients, track services, generate invoices, and record payments as they come in.</p>
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4 text-lg font-bold text-white">3</div>
+            <h3 class="text-base font-semibold text-white mb-2">Start Tracking Everything</h3>
+            <p class="text-slate-400 text-sm">Add clients, track services, generate invoices, and record payments as they come in.</p>
           </div>
         </div>
-        <div class="text-center mt-12">
+        <div class="text-center mt-8">
           <NuxtLink to="/how-it-works">
-            <UButton variant="outline" size="lg">Learn More About How It Works</UButton>
+            <UButton variant="outline" size="md">Learn More About How It Works</UButton>
           </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- Who It's For -->
-    <section class="py-32 px-4 sm:px-6 lg:px-8 bg-slate-950">
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-slate-950">
       <div class="max-w-7xl mx-auto">
-        <div class="text-center mb-20">
-          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Built for Service Providers Like You</h2>
-          <p class="text-slate-400 max-w-2xl mx-auto">Whether you run a hosting company, freelance, or consult, MyPanel helps you stay organized without the complexity.</p>
+        <div class="text-center mb-10">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Built for Service Providers Like You</h2>
+          <p class="text-slate-400 max-w-2xl mx-auto text-sm">Whether you run a hosting company, freelance, or consult, MyPanel helps you stay organized without the complexity.</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
-          <div class="glass-card p-10 hover:bg-white/5 transition-colors border-white/5">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-8">
-              <UIcon name="i-lucide-server" class="w-6 h-6 text-blue-400" />
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass-card p-6 hover:bg-white/5 transition-colors border-white/5">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
+              <UIcon name="i-lucide-server" class="w-5 h-5 text-blue-400" />
             </div>
             <h3 class="text-2xl font-bold text-white mb-4">Web Hosting Providers</h3>
             <p class="text-slate-400 leading-relaxed">

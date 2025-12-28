@@ -39,7 +39,7 @@
       ]"
     >
       <!-- Logo (hidden on mobile, shown in header) -->
-      <div class="hidden lg:block p-6 border-b border-white/10">
+      <div class="hidden lg:block p-4 border-b border-white/10">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
             <UIcon name="i-lucide-shield" class="w-6 h-6 text-white" />
@@ -64,12 +64,12 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
         <NuxtLink
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors text-sm"
           active-class="!text-white !bg-red-500/20 border border-red-500/30"
           @click="isSidebarOpen = false"
         >
