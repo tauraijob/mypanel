@@ -16,7 +16,7 @@
           </div>
           
           <div class="flex items-center gap-4">
-            <NuxtLink to="/login" class="hidden sm:block text-slate-300 hover:text-white transition-colors">Sign In</NuxtLink>
+            <NuxtLink to="/login" class="text-slate-300 hover:text-white transition-colors">Sign In</NuxtLink>
             <NuxtLink to="/signup">
               <UButton color="primary" size="sm">Get Started</UButton>
             </NuxtLink>

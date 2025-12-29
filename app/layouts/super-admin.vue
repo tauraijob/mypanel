@@ -21,18 +21,16 @@
     </header>
 
     <!-- Mobile Sidebar Overlay -->
-    <Teleport to="body">
-      <div
-        v-if="isSidebarOpen"
-        class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-        @click="isSidebarOpen = false"
-      />
-    </Teleport>
+    <div
+      v-if="isSidebarOpen"
+      class="lg:hidden fixed inset-0 bg-black/70 z-[55]"
+      @click="isSidebarOpen = false"
+    />
 
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed lg:relative inset-y-0 left-0 z-50',
+        'fixed lg:relative inset-y-0 left-0 z-[60]',
         'w-64 bg-gradient-to-b from-slate-900 to-slate-800 border-r border-white/10 flex flex-col',
         'transform transition-transform duration-300 ease-in-out',
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
