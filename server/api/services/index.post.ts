@@ -1,24 +1,23 @@
-
 import { addMonths, addDays, addYears } from 'date-fns'
 
 export default defineEventHandler(async (event) => {
-  const authUser = await requireAuth(event)
+  const authUser = requireAuth(event)
   const body = await readBody(event)
 
   // Get user's organization
   const user = await prisma.user.findUnique({
     where: { id: authUser.userId },
-    select: { organizationId: true }
+    select: { organizationId: true, role: true }
   })
 
-  if (!user?.organizationId) {
+  if (!user?.organizationId && user?.role !== 'SUPER_ADMIN') {
     throw createError({
       statusCode: 403,
       message: 'No organization associated with your account'
     })
   }
 
-  const organizationId = user.organizationId
+  const organizationId = user.organizationId!
 
   // Check plan limits
   const limitCheck = await canAddService(organizationId)
@@ -43,10 +42,32 @@ export default defineEventHandler(async (event) => {
     notes
   } = body
 
-  if (!name || !price || !clientId || !categoryId) {
+  if (!name || price === undefined || !clientId || !categoryId) {
     throw createError({
       statusCode: 400,
       message: 'Name, price, client, and category are required'
+    })
+  }
+
+  // Security: Verify client belongs to organization
+  const clientExists = await prisma.client.findFirst({
+    where: { id: Number(clientId), organizationId }
+  })
+  if (!clientExists) {
+    throw createError({
+      statusCode: 404,
+      message: 'Client not found in your organization'
+    })
+  }
+
+  // Security: Verify category belongs to organization
+  const categoryExists = await prisma.serviceCategory.findFirst({
+    where: { id: Number(categoryId), organizationId }
+  })
+  if (!categoryExists) {
+    throw createError({
+      statusCode: 404,
+      message: 'Service category not found in your organization'
     })
   }
 
@@ -73,18 +94,21 @@ export default defineEventHandler(async (event) => {
     case 'ONETIME':
       nextDueDate = start
       break
+    default:
+      nextDueDate = addMonths(start, 1) // Default to monthly
   }
 
   const service = await prisma.service.create({
     data: {
+      organizationId,
       name,
       description,
-      price,
+      price: Number(price),
       billingCycle: billingCycle || 'MONTHLY',
       startDate: start,
       nextDueDate,
-      clientId,
-      categoryId,
+      clientId: Number(clientId),
+      categoryId: Number(categoryId),
       domain,
       server,
       username,
