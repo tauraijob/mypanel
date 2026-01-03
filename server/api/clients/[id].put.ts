@@ -1,4 +1,5 @@
 export default defineEventHandler(async (event) => {
+  const authUser = requireAuth(event)
   const id = parseInt(getRouterParam(event, 'id') || '')
   const body = await readBody(event)
 
@@ -9,8 +10,26 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Get user's organization
+  const user = await prisma.user.findUnique({
+    where: { id: authUser.userId },
+    select: { organizationId: true, role: true }
+  })
+
+  if (!user?.organizationId && user?.role !== 'SUPER_ADMIN') {
+    throw createError({
+      statusCode: 403,
+      message: 'No organization associated with your account'
+    })
+  }
+
+  const organizationId = user.organizationId!
+
   const existing = await prisma.client.findUnique({
-    where: { id }
+    where: {
+      id,
+      organizationId // Ensure security
+    }
   })
 
   if (!existing) {
@@ -20,10 +39,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Check email uniqueness if changed
+  // Check email uniqueness if changed within this organization
   if (body.email && body.email !== existing.email) {
-    const emailExists = await prisma.client.findUnique({
-      where: { email: body.email }
+    const emailExists = await prisma.client.findFirst({
+      where: {
+        email: body.email,
+        organizationId
+      }
     })
     if (emailExists) {
       throw createError({
@@ -34,7 +56,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const client = await prisma.client.update({
-    where: { id },
+    where: {
+      id,
+      organizationId
+    },
     data: {
       name: body.name,
       email: body.email,
