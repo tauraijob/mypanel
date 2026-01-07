@@ -307,7 +307,7 @@ const dropdownStyle = computed(() => ({
 const form = ref({
   clientId: '',
   dueDate: addDays(new Date(), 14).toISOString().split('T')[0],
-  items: [] as Array<{ description: string; quantity: number; unitPrice: number }>,
+  items: [] as Array<{ description: string; quantity: number; unitPrice: number; serviceId?: number }>,
   notes: '',
   terms: '',
   taxAmount: 0,
@@ -423,7 +423,7 @@ const clearClient = () => {
 const addServiceToInvoice = (service: any) => {
   // Check if service is already added
   const exists = form.value.items.some(item => 
-    item.description.includes(service.name)
+    item.serviceId === service.id
   )
   if (exists) {
     toast.add({ title: 'Service already added', color: 'warning' })
@@ -433,7 +433,8 @@ const addServiceToInvoice = (service: any) => {
   form.value.items.push({
     description: `${service.name} - ${service.billingCycle} subscription`,
     quantity: 1,
-    unitPrice: Number(service.price)
+    unitPrice: Number(service.price),
+    serviceId: service.id
   })
   toast.add({ title: 'Service added to invoice', color: 'success' })
 }
