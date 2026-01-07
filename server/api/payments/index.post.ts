@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
     data: {
       invoiceId,
       clientId: invoice.clientId,
+      organizationId: invoice.organizationId,
       amount,
       paymentMethod: paymentMethod || 'BANK_TRANSFER',
       reference,
